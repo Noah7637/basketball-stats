@@ -26,7 +26,7 @@
             </tr>
             <?php foreach ($matches as $match): ?>
                 <tr>
-                    <a href="/match?id=<?= (int) $match['id'] ?>">
+                    
                         <td>
                             <?= htmlspecialchars($match['adversaire']) ?>
                         </td>
@@ -35,13 +35,16 @@
 
                         <td><?= htmlspecialchars($match['date_match']) ?></td>
 
-                        <th<?php if ($match['score_mon_equipe']>$match['score_adversaire']) {
+                        <td<?php if ($match['score_mon_equipe']>$match['score_adversaire']) {
                                     echo " style='color: green'>V";
                                 } else {
                                     echo " style='color: red'>D";
                                 }?>
+                        </td>
+
+                        <th>
+                            <a href="/match?id=<?= (int) $match['id'] ?>">Détails</a>
                         </th>
-                    </a>
                 </tr>
             <?php endforeach; ?>
             </table>

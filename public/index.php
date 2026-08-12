@@ -10,6 +10,7 @@ $router = new Router();
 
 // Accueil = joueurs (le cœur de l'appli, destinée à un coach qui suit ses joueurs)
 $router->get('/', [JoueurController::class, 'index']);
+$router->get('/joueur', [JoueurController::class, 'show']);
 $router->get('/joueurs/create', [JoueurController::class, 'create']);
 $router->post('/joueurs/store', [JoueurController::class, 'store']);
 

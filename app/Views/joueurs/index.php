@@ -64,7 +64,7 @@
                 <?php foreach ($joueurs as $joueur): ?>
                     <tr>
                         <td><?= $joueur['numero'] !== null ? (int) $joueur['numero'] : '-' ?></td>
-                        <td><?= htmlspecialchars($joueur['nom']) ?></td>
+                        <td><a href="joueur?id=<?= (int) $joueur['id'] ?>">  <?= htmlspecialchars($joueur['nom']) ?></a></td>
                         <td><?= htmlspecialchars($joueur['poste'] ?? '-') ?></td>
                         <td><?= (int) $joueur['matchs_joues'] ?></td>
                         <td><?= (int) $joueur['total_points'] ?></td>

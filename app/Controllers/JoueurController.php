@@ -13,6 +13,20 @@ class JoueurController
         require __DIR__ . '/../Views/joueurs/index.php';
     }
 
+    public function show(): void
+    {
+        $id = (int) ($_GET['id'] ?? 0);
+        $joueur = JoueurModel::find($id);
+
+        if (!$joueur) {
+            http_response_code(404);
+            echo "Joueur introuvable.";
+            return;
+        }
+
+        require __DIR__ . '/../Views/joueurs/show.php';
+    }
+
     public function create(): void
     {
         $errors = [];
