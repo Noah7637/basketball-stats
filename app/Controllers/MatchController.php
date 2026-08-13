@@ -2,7 +2,9 @@
 
 namespace App\Controllers;
 
+use App\Models\JoueurModel;
 use App\Models\MatchModel;
+use App\Models\SelectionModel;
 
 class MatchController
 {
@@ -16,6 +18,7 @@ class MatchController
     {
         $id = (int) ($_GET['id'] ?? 0);
         $match = MatchModel::find($id);
+        $joueurs = SelectionModel::joueursDuMatch($id);
 
         if (!$match) {
             http_response_code(404);
@@ -33,6 +36,20 @@ class MatchController
         require __DIR__ . '/../Views/matches/create.php';
     }
 
+    public function delete(): void
+    {
+        $id = (int) ($_GET['id']); 
+
+        if (!$id) {
+            http_response_code(404);
+            echo "Match introuvable.";
+            return;
+        }
+
+        MatchModel::delete($id);
+        header('Location: /matches');
+    }
+
     public function store(): void
     {
         $errors = $this->validate($_POST);
@@ -43,7 +60,7 @@ class MatchController
             return;
         }
 
-        MatchModel::create([
+        $matchId = MatchModel::create([
             'adversaire' => trim($_POST['adversaire']),
             'domicile' => isset($_POST['domicile']) ? 1 : 0,
             'date_match' => $_POST['date_match'],
@@ -51,7 +68,7 @@ class MatchController
             'score_adversaire' => (int) $_POST['score_adversaire'],
         ]);
 
-        header('Location: /');
+        header('Location: /match/selection?id=' . $matchId);
         exit;
     }
 
@@ -77,4 +94,92 @@ class MatchController
 
         return $errors;
     }
+
+    public function selectionJoueurs(): void
+    {
+        $matchId = (int) ($_GET['id'] ?? 0);
+        $match = MatchModel::find($matchId);
+
+        if (!$match) {
+            http_response_code(404);
+            echo "Match introuvable.";
+            return;
+        }
+
+        $joueurs = JoueurModel::all();
+        $selectionnes = array_column(SelectionModel::joueursDuMatch($matchId), 'id');
+
+        require __DIR__ . '/../Views/matches/selection.php';
+    }
+
+    public function saveSelection(): void
+    {
+        $matchId = (int) ($_POST['match_id'] ?? 0);
+        $joueurIds = $_POST['joueurs'] ?? [];
+
+        if (!$matchId || empty($joueurIds)) {
+            // On renvoie vers la sélection avec un message si rien n'est coché
+            header('Location: /match/selection?id=' . $matchId . '&error=1');
+            exit;
+        }
+
+        SelectionModel::saveSelection($matchId, $joueurIds);
+
+        // Prochaine étape à coder : la page de saisie des stats
+        header('Location: /match/stats?id=' . $matchId);
+        exit;
+    }
+
+    public function edit(): void
+    {
+        $matchId = (int) ($_GET['id'] ?? 0);
+        $match = MatchModel::find($matchId);
+
+        if (!$match) {
+            http_response_code(404);
+            echo "Match introuvable.";
+            return;
+        }
+
+        $errors = [];
+        $joueurs = JoueurModel::all();
+        $selectionnes = array_column(SelectionModel::joueursDuMatch($matchId), 'id');
+
+        require __DIR__ . '/../Views/matches/edit.php';
+    }
+
+    public function update(): void
+    {
+        $matchId = (int) ($_POST['match_id'] ?? 0);
+        $match = MatchModel::find($matchId);
+
+        if (!$match) {
+            http_response_code(404);
+            echo "Match introuvable.";
+            return;
+        }
+
+        $errors = $this->validate($_POST);
+
+        if (!empty($errors)) {
+            $joueurs = JoueurModel::all();
+            $selectionnes = array_column(SelectionModel::joueursDuMatch($matchId), 'id');
+            require __DIR__ . '/../Views/matches/edit.php';
+            return;
+        }
+
+        MatchModel::update($matchId, [
+            'adversaire' => trim($_POST['adversaire']),
+            'domicile' => isset($_POST['domicile']) ? 1 : 0,
+            'date_match' => $_POST['date_match'],
+            'score_mon_equipe' => (int) $_POST['score_mon_equipe'],
+            'score_adversaire' => (int) $_POST['score_adversaire'],
+        ]);
+
+        SelectionModel::saveSelection($matchId, $_POST['joueurs'] ?? []);
+
+        header('Location: /matches');
+        exit;
+    }
+
 }

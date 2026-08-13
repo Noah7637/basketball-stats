@@ -32,4 +32,29 @@ class MatchModel
         $stmt->execute($data);
         return (int) $pdo->lastInsertId();
     }
+ 
+    public static function delete(int $id): int
+    {
+        $pdo = Database::getInstance();
+        $stmt = $pdo->prepare("DELETE FROM matches WHERE id = :id");
+        $stmt->execute(['id' => $id]);
+        return $stmt->rowCount();
+    }
+
+    public static function update(int $id, array $data): int
+{
+    $pdo = Database::getInstance();
+    $stmt = $pdo->prepare(
+        "UPDATE matches
+         SET adversaire = :adversaire,
+             domicile = :domicile,
+             date_match = :date_match,
+             score_mon_equipe = :score_mon_equipe,
+             score_adversaire = :score_adversaire
+         WHERE id = :id"
+    );
+    $data['id'] = $id;
+    $stmt->execute($data);
+    return $stmt->rowCount();
+}
 }

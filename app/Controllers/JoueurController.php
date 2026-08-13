@@ -27,6 +27,20 @@ class JoueurController
         require __DIR__ . '/../Views/joueurs/show.php';
     }
 
+    public function delete(): void
+    {
+        $id = (int) ($_GET['id']); 
+
+        if (!$id) {
+            http_response_code(404);
+            echo "Joueur introuvable.";
+            return;
+        }
+
+        JoueurModel::delete($id);
+        header('Location: /');
+    }
+
     public function create(): void
     {
         $errors = [];
@@ -67,5 +81,49 @@ class JoueurController
         }
 
         return $errors;
+    }
+
+    public function edit(): void
+    {
+        $joueurId = (int) ($_GET['id'] ?? 0);
+        $joueur = JoueurModel::find($joueurId);
+
+        if (!$joueur) {
+            http_response_code(404);
+            echo "Joueur introuvable.";
+            return;
+        }
+
+        $errors = [];
+
+        require __DIR__ . '/../Views/joueurs/edit.php';
+    }
+
+    public function update(): void
+    {
+        $joueurId = (int) ($_POST['joueur_id'] ?? 0);
+        $joueur = JoueurModel::find($joueurId);
+
+        if (!$joueur) {
+            http_response_code(404);
+            echo "Joueur introuvable.";
+            return;
+        }
+
+        $errors = $this->validate($_POST);
+
+        if (!empty($errors)) {
+            require __DIR__ . '/../Views/joueurs/edit.php';
+            return;
+        }
+
+        JoueurModel::update($joueurId, [
+            'nom' => trim($_POST['nom']),
+            'numero' => (int) $_POST['numero'],
+            'poste' => trim($_POST['poste']),
+        ]);
+
+        header('Location: /');
+        exit;
     }
 }

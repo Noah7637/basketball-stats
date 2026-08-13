@@ -19,6 +19,7 @@
     <?php else: ?>
         <table class="stats-table">
             <tr>
+                <td></td>
                 <th>Adversaire</th>
                 <th>Score</th>
                 <th>date</th>
@@ -26,7 +27,9 @@
             </tr>
             <?php foreach ($matches as $match): ?>
                 <tr>
-                    
+                        <th>
+                            <a href="/match?id=<?= (int) $match['id'] ?>">Détails</a>
+                        </th>
                         <td>
                             <?= htmlspecialchars($match['adversaire']) ?>
                         </td>
@@ -35,15 +38,21 @@
 
                         <td><?= htmlspecialchars($match['date_match']) ?></td>
 
-                        <td<?php if ($match['score_mon_equipe']>$match['score_adversaire']) {
+                        <td<?php if ($match['score_mon_equipe'] > $match['score_adversaire']) {
                                     echo " style='color: green'>V";
-                                } else {
+                                } else if ($match['score_mon_equipe'] < $match['score_adversaire']) {
                                     echo " style='color: red'>D";
+                                } else {
+                                    echo ">Pas terminé";
                                 }?>
                         </td>
 
+                        
                         <th>
-                            <a href="/match?id=<?= (int) $match['id'] ?>">Détails</a>
+                            <a style="color: red" href="/match/delete?id=<?= (int) $match['id'] ?>">Supprimer</a>
+                        </th>
+                        <th>
+                            <a style="color: green" href="/match/edit?id=<?= (int) $match['id'] ?>">Modifier</a>
                         </th>
                 </tr>
             <?php endforeach; ?>

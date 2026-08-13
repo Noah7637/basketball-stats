@@ -72,6 +72,12 @@
                         <td><?= (int) $joueur['total_passes'] ?></td>
                         <td><?= (int) $joueur['total_interceptions'] ?></td>
                         <td><?= (int) $joueur['total_contres'] ?></td>
+                        <th>
+                            <a style="color: red" href="/joueur/delete?id=<?= (int) $joueur['id'] ?>">Supprimer</a>
+                        </th>
+                        <th>
+                            <a style="color: green" href="/joueur/edit?id=<?= (int) $joueur['id'] ?>">Modifier</a>
+                        </th>
                     </tr>
                 <?php endforeach; ?>
             </tbody>

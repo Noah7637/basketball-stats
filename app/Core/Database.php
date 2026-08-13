@@ -21,6 +21,7 @@ class Database
                 self::$instance = new PDO($dsn, $db['user'], $db['pass'], [
                     PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
                     PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+                    PDO::ATTR_EMULATE_PREPARES => true,
                 ]);
             } catch (PDOException $e) {
                 die('Erreur de connexion à la base de données : ' . $e->getMessage());

@@ -57,6 +57,29 @@ class JoueurModel
         return (int) $pdo->lastInsertId();
     }
 
+    public static function delete(int $id): int
+    {
+        $pdo = Database::getInstance();
+        $stmt = $pdo->prepare("DELETE FROM joueurs WHERE id = :id");
+        $stmt->execute(['id' => $id]);
+        return $stmt->rowCount();
+    }
+
+    public static function update(int $id, array $data): int
+{
+    $pdo = Database::getInstance();
+    $stmt = $pdo->prepare(
+        "UPDATE joueurs
+         SET nom = :nom,
+             numero = :numero,
+             poste = :poste
+         WHERE id = :id"
+    );
+    $data['id'] = $id;
+    $stmt->execute($data);
+    return $stmt->rowCount();
+}
+
     /**
      * Le meneur de chaque catégorie (marqueur, passeur, rebondeur), pour le mettre en avant.
      * Retourne null pour une catégorie si aucune stat n'a encore été saisie.
