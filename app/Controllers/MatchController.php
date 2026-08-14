@@ -126,7 +126,9 @@ class MatchController
         SelectionModel::saveSelection($matchId, $joueurIds);
 
         // Prochaine étape à coder : la page de saisie des stats
-        header('Location: /match/stats?id=' . $matchId);
+        header('Location: /match?id=' . $matchId);
+
+        // header('Location: /match/stats?id=' . $matchId);
         exit;
     }
 

@@ -1,0 +1,70 @@
+.selection-form {
+    max-width: 600px;
+
+    padding: 25px;
+
+    background-color: #ffffff;
+
+    border: 1px solid #e5e0d8;
+    border-radius: 10px;
+
+    box-shadow: 0 3px 12px rgba(23, 32, 51, 0.06);
+}
+
+
+.selection-form h1 {
+    color: #172033;
+    margin-bottom: 20px;
+}
+
+
+.selection-player {
+    display: flex;
+
+    align-items: center;
+
+    gap: 10px;
+
+    padding: 12px;
+
+    margin-bottom: 5px;
+
+    border-radius: 7px;
+
+    cursor: pointer;
+}
+
+
+.selection-player:hover {
+    background-color: #fff7ef;
+}
+
+
+.selection-player input {
+    width: 17px;
+    height: 17px;
+
+    accent-color: #ff8a30;
+}
+
+
+.selection-form button {
+    margin-top: 20px;
+
+    padding: 11px 18px;
+
+    border: none;
+    border-radius: 7px;
+
+    background-color: #ff8a30;
+    color: #ffffff;
+
+    font-size: 1rem;
+    font-weight: 600;
+
+    cursor: pointer;
+}
+
+.selection-form button:hover {
+    background-color: #e86f1f;
+}

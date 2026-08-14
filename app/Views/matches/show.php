@@ -1,28 +1,76 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <title>Détail du match</title>
-    <link rel="stylesheet" href="/assets/css/style.css">
-</head>
-<body>
-    <h1>Mon équipe <?= $match['domicile'] ? 'vs' : '@' ?> <?= htmlspecialchars($match['adversaire']) ?></h1>
-    <p>Score : <?= (int) $match['score_mon_equipe'] ?> - <?= (int) $match['score_adversaire'] ?></p>
-    <p>Date : <?= htmlspecialchars($match['date_match']) ?></p>
-    <p><?= $match['domicile'] ? 'Match à domicile' : 'Match à l\'extérieur' ?></p><br>
-    <p>Liste des joueurs :</p>
-    <ul>
-    <?php
-        foreach ($joueurs as $j) {
-            ?><li><?php
-            echo $j['nom'];?>
-            </li><?php
-        }  
-    ?>
-    </ul>
-    <br>
-    <!-- Ici tu ajouteras l'affichage des statistiques par joueur (étape suivante) -->
+<?php
 
-    <a href="/matches">Retour à la liste</a>
-</body>
-</html>
+ob_start();
+
+?>
+
+<h1>
+    Mon équipe
+    vs
+    <?= htmlspecialchars($match['adversaire']) ?>
+</h1>
+
+
+<div class="match-score">
+
+    <p>Score final</p>
+
+    <p class="score">
+        <?= (int) $match['score_mon_equipe'] ?>
+        -
+        <?= (int) $match['score_adversaire'] ?>
+    </p>
+
+</div>
+
+
+<div class="match-info">
+
+    <p>
+        <strong>Date :</strong>
+        <?= htmlspecialchars($match['date_match']) ?>
+    </p>
+
+    <p>
+        <strong>Lieu :</strong>
+        <?= $match['domicile']
+            ? 'Match à domicile'
+            : 'Match à l’extérieur' ?>
+    </p>
+
+</div>
+
+
+<section class="players-section">
+
+    <h2>Joueurs présents</h2>
+
+    <ul class="players-list">
+
+        <?php foreach ($joueurs as $j): ?>
+
+            <li>
+                <?= htmlspecialchars($j['nom']) ?>
+            </li>
+
+        <?php endforeach; ?>
+
+    </ul>
+
+</section>
+
+
+<a class="back-link" href="/matches">
+    ← Retour à la liste des matchs
+</a>
+
+
+<?php
+
+$title = "Détails du match";
+
+$css = "show.css";
+
+$content = ob_get_clean();
+
+require __DIR__ . '/../layout.php';

@@ -15,18 +15,24 @@ class JoueurModel
         $pdo = Database::getInstance();
         $stmt = $pdo->query(
             "SELECT
-                j.id, j.nom, j.numero, j.poste,
-                COALESCE(SUM(s.points), 0) AS total_points,
-                COALESCE(SUM(s.rebonds), 0) AS total_rebonds,
-                COALESCE(SUM(s.passes_decisives), 0) AS total_passes,
-                COALESCE(SUM(s.interceptions), 0) AS total_interceptions,
-                COALESCE(SUM(s.contres), 0) AS total_contres,
-                COUNT(DISTINCT s.match_id) AS matchs_joues
-             FROM joueurs j
-             LEFT JOIN statistiques s ON s.joueur_id = j.id
-             WHERE j.actif = 1
-             GROUP BY j.id
-             ORDER BY total_points DESC"
+    j.id, j.nom, j.numero, j.poste,
+    COALESCE(AVG(s.tirs_2pts_reussis*2 + s.tirs_3pts_reussis*3 + s.lancers_francs_reussis), 0) AS moyenne_points,
+    COALESCE(AVG(s.passes_decisives), 0) AS moyenne_passes,
+    COALESCE(
+        SUM(s.tirs_2pts_reussis*2 + s.tirs_3pts_reussis*3 + s.lancers_francs_reussis) / NULLIF(SUM(s.tirs_2pts_tentes + s.tirs_3pts_tentes), 0),
+        0
+        ) AS points_par_tentative,
+    COALESCE(
+        SUM(s.tirs_2pts_reussis + s.tirs_3pts_reussis) / NULLIF(SUM(s.tirs_2pts_tentes + s.tirs_3pts_tentes), 0),
+        0
+    ) AS pourcentage_reussite_tirs,
+    COALESCE(AVG(s.duels_defensifs_gagnes), 0) AS duel_def,
+    COUNT(DISTINCT s.match_id) AS matchs_joues
+FROM joueurs j
+LEFT JOIN statistiques s ON s.joueur_id = j.id
+WHERE j.actif = 1
+GROUP BY j.id
+ORDER BY moyenne_points DESC"
         );
         return $stmt->fetchAll();
     }
@@ -84,32 +90,32 @@ class JoueurModel
      * Le meneur de chaque catégorie (marqueur, passeur, rebondeur), pour le mettre en avant.
      * Retourne null pour une catégorie si aucune stat n'a encore été saisie.
      */
-    public static function topPerformers(): array
-    {
-        $pdo = Database::getInstance();
+    // public static function topPerformers(): array
+    // {
+    //     $pdo = Database::getInstance();
 
-        $categories = [
-            'marqueur' => 'points',
-            'passeur' => 'passes_decisives',
-            'rebondeur' => 'rebonds',
-        ];
+    //     $categories = [
+    //         'marqueur' => 'points',
+    //         'passeur' => 'passes_decisives',
+    //         'rebondeur' => 'rebonds',
+    //     ];
 
-        $result = [];
+    //     $result = [];
 
-        foreach ($categories as $key => $colonne) {
-            $stmt = $pdo->prepare(
-                "SELECT j.nom, j.numero, SUM(s.$colonne) AS total
-                 FROM statistiques s
-                 JOIN joueurs j ON j.id = s.joueur_id
-                 WHERE j.actif = 1
-                 GROUP BY j.id
-                 ORDER BY total DESC
-                 LIMIT 1"
-            );
-            $stmt->execute();
-            $result[$key] = $stmt->fetch() ?: null;
-        }
+    //     foreach ($categories as $key => $colonne) {
+    //         $stmt = $pdo->prepare(
+    //             "SELECT j.nom, j.numero, SUM(s.$colonne) AS total
+    //              FROM statistiques s
+    //              JOIN joueurs j ON j.id = s.joueur_id
+    //              WHERE j.actif = 1
+    //              GROUP BY j.id
+    //              ORDER BY total DESC
+    //              LIMIT 1"
+    //         );
+    //         $stmt->execute();
+    //         $result[$key] = $stmt->fetch() ?: null;
+    //     }
 
-        return $result;
-    }
+    //     return $result;
+    // }
 }

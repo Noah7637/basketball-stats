@@ -9,7 +9,7 @@ class JoueurController
     public function index(): void
     {
         $joueurs = JoueurModel::allWithStats();
-        $top = JoueurModel::topPerformers();
+        // $top = JoueurModel::topPerformers();
         require __DIR__ . '/../Views/joueurs/index.php';
     }
 

@@ -1,22 +1,60 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <title>Détail du match</title>
-    <link rel="stylesheet" href="/assets/css/style.css">
-</head>
-<body>
+<?php
 
-<form method="POST" action="/match/selection">
-    <input type="hidden" name="match_id" value="<?= (int) $match['id'] ?>">
+ob_start();
+
+?>
+
+<form
+    class="selection-form"
+    method="POST"
+    action="/match/selection"
+>
+
+    <h1>Sélection des joueurs</h1>
+
+    <input
+        type="hidden"
+        name="match_id"
+        value="<?= (int) $match['id'] ?>"
+    >
+
+
     <?php foreach ($joueurs as $j): ?>
-        <label>
-            <input type="checkbox" name="joueurs[]" value="<?= $j['id'] ?>">
+
+        <label class="selection-player">
+
+            <input
+                type="checkbox"
+                name="joueurs[]"
+                value="<?= (int) $j['id'] ?>"
+            >
+
             <?= htmlspecialchars($j['nom']) ?>
+
+            <?php if ($j['numero'] !== null): ?>
+
+                (#<?= (int) $j['numero'] ?>)
+
+            <?php endif; ?>
+
         </label>
+
     <?php endforeach; ?>
-    <button type="submit">Valider la sélection</button>
+
+
+    <button type="submit">
+        Valider la sélection
+    </button>
+
 </form>
 
-</body>
-</html>
+
+<?php
+
+$title = "Sélection des joueurs";
+
+$css = "selection.css";
+
+$content = ob_get_clean();
+
+require __DIR__ . '/../layout.php';
