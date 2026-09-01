@@ -2,14 +2,17 @@ applications:
   app:
     type: php:8.3
 
+    relationships:
+      database: "db:mysql"
+
     build:
       flavor: composer
 
     web:
       locations:
         "/":
-          root: htdocs
-          passthru: /index.php
+          root: "public"
+          passthru: "/index.php"
           index:
             - index.php
 
@@ -17,3 +20,12 @@ applications:
       build: |
         set -e
         composer install --no-dev --optimize-autoloader
+
+services:
+  db:
+    type: mariadb:10.6
+
+routes:
+  "https://{default}/":
+    type: upstream
+    upstream: "app:http"
