@@ -1,0 +1,19 @@
+applications:
+  app:
+    type: php:8.3
+
+    build:
+      flavor: composer
+
+    web:
+      locations:
+        "/":
+          root: htdocs
+          passthru: /index.php
+          index:
+            - index.php
+
+    hooks:
+      build: |
+        set -e
+        composer install --no-dev --optimize-autoloader
