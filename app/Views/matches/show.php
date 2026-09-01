@@ -62,8 +62,8 @@ ob_start();
                 <td><?= number_format($stats["pts_par_possession"], 2) ?></td>
                 <td><?= number_format($stats["pts_par_transition"], 2) ?></td>
                 <td><?= number_format($stats["pts_par_jeu_pose"], 2) ?></td>
-                <td><?= $stats["lf_tentes"] ?>/<?= $stats["lf_reussis"] ?></td>
-                <td><?= number_format($stats["pourcentage_lf"], 1) ?></td>
+                <td><?= $stats["lf_reussis"] ?>/<?= $stats["lf_tentes"] ?></td>
+                <td><?= (($stats["pourcentage_lf"])*100) ?></td>
                 <td><?= $stats["contre_attaques"] ?></td>
                 <td><?= number_format($stats["pourcentage_contre_attaques"], 1) ?></td>
                 <td><?= $stats["reb_def"] ?></td>
