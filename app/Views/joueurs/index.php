@@ -76,7 +76,7 @@ ob_start();
                 </td>
 
                 <td>
-                    <?= (number_format($joueur['points_par_tentative'], 2) )?>
+                    <?= number_format($joueur['points_par_tentative'], 2) ?>
                 </td>
 
                 <td>

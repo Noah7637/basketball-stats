@@ -2,21 +2,24 @@
 
 namespace App\Controllers;
 
-use App\Core\Auth;
 use App\Models\JoueurModel;
 
 class JoueurController
 {
     public function index(): void
     {
-        $joueurs = JoueurModel::allWithStats(Auth::id());
+        $joueurs = JoueurModel::allWithStats();
+        // $top = JoueurModel::topPerformers();
         require __DIR__ . '/../Views/joueurs/index.php';
     }
 
     public function show(): void
     {
         $id = (int) ($_GET['id'] ?? 0);
-        $joueur = JoueurModel::find($id, Auth::id());
+        $joueur = JoueurModel::find($id);
+        $moyenne = JoueurModel::joueurWithStats($id);
+        $stats_match = JoueurModel::statsParMatch($id);
+
 
         if (!$joueur) {
             http_response_code(404);
@@ -25,6 +28,20 @@ class JoueurController
         }
 
         require __DIR__ . '/../Views/joueurs/show.php';
+    }
+
+    public function delete(): void
+    {
+        $id = (int) ($_GET['id']); 
+
+        if (!$id) {
+            http_response_code(404);
+            echo "Joueur introuvable.";
+            return;
+        }
+
+        JoueurModel::delete($id);
+        header('Location: /');
     }
 
     public function create(): void
@@ -44,70 +61,12 @@ class JoueurController
             return;
         }
 
-        JoueurModel::create(Auth::id(), [
+        JoueurModel::create([
             'nom' => trim($_POST['nom']),
             'numero' => $_POST['numero'] !== '' ? (int) $_POST['numero'] : null,
             'poste' => $_POST['poste'] !== '' ? $_POST['poste'] : null,
         ]);
 
-        header('Location: /');
-        exit;
-    }
-
-    public function edit(): void
-    {
-        $id = (int) ($_GET['id'] ?? 0);
-        $joueur = JoueurModel::find($id, Auth::id());
-
-        if (!$joueur) {
-            http_response_code(404);
-            echo "Joueur introuvable.";
-            return;
-        }
-
-        $errors = [];
-        require __DIR__ . '/../Views/joueurs/edit.php';
-    }
-
-    public function update(): void
-    {
-        $id = (int) ($_POST['joueur_id'] ?? 0);
-        $joueur = JoueurModel::find($id, Auth::id());
-
-        if (!$joueur) {
-            http_response_code(404);
-            echo "Joueur introuvable.";
-            return;
-        }
-
-        $errors = $this->validate($_POST);
-
-        if (!empty($errors)) {
-            require __DIR__ . '/../Views/joueurs/edit.php';
-            return;
-        }
-
-        JoueurModel::update($id, Auth::id(), [
-            'nom' => trim($_POST['nom']),
-            'numero' => (int) $_POST['numero'],
-            'poste' => trim($_POST['poste']),
-        ]);
-
-        header('Location: /');
-        exit;
-    }
-
-    public function delete(): void
-    {
-        $id = (int) ($_GET['id'] ?? 0);
-
-        if (!$id) {
-            http_response_code(404);
-            echo "Joueur introuvable.";
-            return;
-        }
-
-        JoueurModel::delete($id, Auth::id());
         header('Location: /');
         exit;
     }
@@ -125,5 +84,49 @@ class JoueurController
         }
 
         return $errors;
+    }
+
+    public function edit(): void
+    {
+        $joueurId = (int) ($_GET['id'] ?? 0);
+        $joueur = JoueurModel::find($joueurId);
+
+        if (!$joueur) {
+            http_response_code(404);
+            echo "Joueur introuvable.";
+            return;
+        }
+
+        $errors = [];
+
+        require __DIR__ . '/../Views/joueurs/edit.php';
+    }
+
+    public function update(): void
+    {
+        $joueurId = (int) ($_POST['joueur_id'] ?? 0);
+        $joueur = JoueurModel::find($joueurId);
+
+        if (!$joueur) {
+            http_response_code(404);
+            echo "Joueur introuvable.";
+            return;
+        }
+
+        $errors = $this->validate($_POST);
+
+        if (!empty($errors)) {
+            require __DIR__ . '/../Views/joueurs/edit.php';
+            return;
+        }
+
+        JoueurModel::update($joueurId, [
+            'nom' => trim($_POST['nom']),
+            'numero' => (int) $_POST['numero'],
+            'poste' => trim($_POST['poste']),
+        ]);
+
+        header('Location: /');
+        exit;
     }
 }
