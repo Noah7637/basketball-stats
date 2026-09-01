@@ -10,7 +10,41 @@ ob_start();
     <a href="/match/create">+ Créer un match</a>
 </p>
 
+<h4>Stats/match</h4>
 
+<table class="borderless-header-table">
+
+        <thead>
+            <tr>
+                <th>Matchs</th>
+                <th>Pts/possession</th>
+                <th>Pts/transition</th>
+                <th>Pts/jeu posé</th>
+                <th>LF</th>
+                <th>%LF</th>
+                <th>Contre attaque</th>
+                <th>%Contre attaque</th>
+                <th>Reb def</th>
+                <th>Reb off adv</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><?= $moyenne["nb_matchs"] ?></td>
+                <td><?= number_format($moyenne["pts_par_possession"], 2) ?></td>
+                <td><?= number_format($moyenne["pts_par_transition"], 2) ?></td>
+                <td><?= number_format($moyenne["pts_par_jeu_pose"], 2) ?></td>
+                <td><?= $moyenne["lf_tentes"] ?>/<?= $moyenne["lf_reussis"] ?></td>
+                <td><?= number_format($moyenne["pourcentage_lf"], 1) ?></td>
+                <td><?= number_format($moyenne["contre_attaques"], 1) ?></td>
+                <td><?= number_format($moyenne["pourcentage_contre_attaques"], 1) ?></td>
+                <td><?= number_format($moyenne["reb_def"], 1) ?></td>
+                <td><?= number_format($moyenne["reb_off_adv"], 1) ?></td>
+            </tr>
+        </tbody>
+</table>
+<br>
+<h4>Liste matchs</h4>
 <?php if (empty($matches)): ?>
 
     <p class="empty-message">

@@ -17,6 +17,9 @@ class JoueurController
     {
         $id = (int) ($_GET['id'] ?? 0);
         $joueur = JoueurModel::find($id);
+        $moyenne = JoueurModel::joueurWithStats($id);
+        $stats_match = JoueurModel::statsParMatch($id);
+
 
         if (!$joueur) {
             http_response_code(404);

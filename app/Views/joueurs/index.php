@@ -18,6 +18,7 @@ ob_start();
     </p>
 
 <?php else: ?>
+    <h3>Moyennes par match</h3><br>
 
     <table class="borderless-header-table">
 
@@ -67,23 +68,23 @@ ob_start();
                 </td>
 
                 <td>
-                    <?= (int) $joueur['moyenne_points'] ?>
+                    <?= number_format($joueur['moyenne_points'], 1) ?>
                 </td>
 
                 <td>
-                    <?= (int) $joueur['moyenne_passes'] ?>
+                    <?= number_format($joueur['moyenne_passes'], 1) ?>
                 </td>
 
                 <td>
-                    <?= (int) $joueur['points_par_tentative'] ?>
+                    <?= number_format($joueur['points_par_tentative'], 2) ?>
                 </td>
 
                 <td>
-                    <?= (int) $joueur['pourcentage_reussite_tirs'] ?>%
+                    <?= number_format($joueur['pourcentage_reussite_tirs'], 1) ?>%
                 </td>
 
                 <td>
-                    <?= (int) $joueur['duel_def'] ?>
+                    <?= number_format($joueur['duel_def'], 1) ?>
                 </td>
 
                 <td>

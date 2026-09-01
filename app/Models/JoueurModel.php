@@ -23,7 +23,7 @@ class JoueurModel
         0
         ) AS points_par_tentative,
     COALESCE(
-        SUM(s.tirs_2pts_reussis + s.tirs_3pts_reussis) / NULLIF(SUM(s.tirs_2pts_tentes + s.tirs_3pts_tentes), 0),
+        (SUM(s.tirs_2pts_reussis + s.tirs_3pts_reussis) / NULLIF(SUM(s.tirs_2pts_tentes + s.tirs_3pts_tentes), 0))*100,
         0
     ) AS pourcentage_reussite_tirs,
     COALESCE(AVG(s.duels_defensifs_gagnes), 0) AS duel_def,
@@ -34,7 +34,36 @@ WHERE j.actif = 1
 GROUP BY j.id
 ORDER BY moyenne_points DESC"
         );
-        return $stmt->fetchAll();
+        $result = $stmt->fetchAll();
+        return $result;
+    }
+
+    public static function joueurWithStats(int $id): array
+    {
+        $pdo = Database::getInstance();
+        $stmt = $pdo->prepare(
+            "SELECT
+    j.id, j.nom, j.numero, j.poste,
+    COALESCE(AVG(s.tirs_2pts_reussis*2 + s.tirs_3pts_reussis*3 + s.lancers_francs_reussis), 0) AS moyenne_points,
+    COALESCE(AVG(s.passes_decisives), 0) AS moyenne_passes,
+    COALESCE(
+        SUM(s.tirs_2pts_reussis*2 + s.tirs_3pts_reussis*3 + s.lancers_francs_reussis) / NULLIF(SUM(s.tirs_2pts_tentes + s.tirs_3pts_tentes), 0),
+        0
+        ) AS points_par_tentative,
+    COALESCE(
+        (SUM(s.tirs_2pts_reussis + s.tirs_3pts_reussis) / NULLIF(SUM(s.tirs_2pts_tentes + s.tirs_3pts_tentes), 0))*100,
+        0
+    ) AS pourcentage_reussite_tirs,
+    COALESCE(AVG(s.duels_defensifs_gagnes), 0) AS duel_def,
+    COUNT(DISTINCT s.match_id) AS matchs_joues
+FROM joueurs j
+LEFT JOIN statistiques s ON s.joueur_id = j.id
+WHERE j.id = :id
+GROUP BY j.id, j.nom, j.numero, j.poste"
+        );
+        $stmt->execute(['id' => $id]);
+        $result = $stmt->fetch();
+        return $result ?: null;
     }
 
     public static function find(int $id): ?array
@@ -52,6 +81,33 @@ ORDER BY moyenne_points DESC"
         $stmt = $pdo->query("SELECT * FROM joueurs WHERE actif = 1 ORDER BY nom");
         return $stmt->fetchAll();
     }
+
+    public static function statsParMatch(int $id): array
+{
+    $pdo = Database::getInstance();
+    $stmt = $pdo->prepare(
+        "SELECT
+            m.adversaire,
+            m.date_match AS date,
+            m.score_mon_equipe,
+            m.score_adversaire,
+            s.passes_decisives,
+            s.tirs_2pts_reussis,
+            s.tirs_2pts_tentes,
+            s.tirs_3pts_reussis,
+            s.tirs_3pts_tentes,
+            s.lancers_francs_reussis,
+            s.lancers_francs_tentes,
+            s.duels_defensifs_gagnes,
+            (s.tirs_2pts_reussis*2 + s.tirs_3pts_reussis*3 + s.lancers_francs_reussis) AS points
+         FROM statistiques s
+         JOIN matches m ON s.match_id = m.id
+         WHERE s.joueur_id = :id
+         ORDER BY m.date_match DESC"
+    );
+    $stmt->execute(['id' => $id]);
+    return $stmt->fetchAll();
+}
 
     public static function create(array $data): int
     {

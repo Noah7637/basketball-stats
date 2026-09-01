@@ -5,12 +5,14 @@ namespace App\Controllers;
 use App\Models\JoueurModel;
 use App\Models\MatchModel;
 use App\Models\SelectionModel;
+use App\Models\StatistiqueModel;
 
 class MatchController
 {
     public function index(): void
     {
         $matches = MatchModel::all();
+        $moyenne = MatchModel::moyenne();
         require __DIR__ . '/../Views/matches/index.php';
     }
 
@@ -19,6 +21,7 @@ class MatchController
         $id = (int) ($_GET['id'] ?? 0);
         $match = MatchModel::find($id);
         $joueurs = SelectionModel::joueursDuMatch($id);
+        $stats = MatchModel::statMatch($id);
 
         if (!$match) {
             http_response_code(404);
@@ -183,5 +186,55 @@ class MatchController
         header('Location: /matches');
         exit;
     }
+
+
+public function live(): void
+{
+    $matchId = (int) ($_GET['id'] ?? 0);
+    $match = MatchModel::find($matchId);
+
+    if (!$match) {
+        http_response_code(404);
+        echo "Match introuvable.";
+        return;
+    }
+
+    $joueurs = SelectionModel::joueursDuMatch($matchId);
+
+    if (empty($joueurs)) {
+        header('Location: /match/selection?id=' . $matchId);
+        exit;
+    }
+
+    require __DIR__ . '/../Views/matches/live.php';
+}
+
+public function liveSave(): void
+{
+    header('Content-Type: application/json');
+
+    $matchId = (int) ($_POST['match_id'] ?? 0);
+    $actionsJson = $_POST['actions'] ?? '[]';
+    $actions = json_decode($actionsJson, true);
+
+    if (!$matchId || !is_array($actions)) {
+        http_response_code(400);
+        echo json_encode(['success' => false, 'error' => 'Requête invalide.']);
+        return;
+    }
+
+    if (empty($actions)) {
+        echo json_encode(['success' => true, 'message' => 'Aucune action à enregistrer.']);
+        return;
+    }
+
+    try {
+        StatistiqueModel::sauvegarderLot($matchId, $actions);
+        echo json_encode(['success' => true]);
+    } catch (\Throwable $e) {
+        http_response_code(500);
+        echo json_encode(['success' => false, 'error' => "Erreur lors de l'enregistrement."]);
+    }
+}
 
 }

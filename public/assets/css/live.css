@@ -1,0 +1,113 @@
+.live-players {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.live-player-btn {
+    padding: 0.5rem 0.9rem;
+    border: 1px solid #ccc;
+    border-radius: 20px;
+    background: white;
+    cursor: pointer;
+}
+
+.live-player-btn.active {
+    background: #1f5c34;
+    color: white;
+    border-color: #1f5c34;
+}
+
+.live-panel {
+    background: #f4f8f5;
+    border: 1px solid #d8e6dc;
+    border-radius: 8px;
+    padding: 1.25rem;
+    margin-bottom: 1.5rem;
+}
+
+.live-action-group {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin-bottom: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.live-action-label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #555;
+    min-width: 120px;
+}
+
+.live-toggle {
+    padding: 0.4rem 0.8rem;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    background: white;
+    cursor: pointer;
+}
+
+.live-toggle.active {
+    background: #2e8b50;
+    color: white;
+    border-color: #2e8b50;
+}
+
+#valider-action {
+    margin-top: 0.5rem;
+}
+
+#valider-action:disabled,
+#save-all:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.live-quick-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin-top: 1rem;
+    padding-top: 0.75rem;
+    border-top: 1px dashed #ccc;
+    flex-wrap: wrap;
+}
+
+.live-team-actions {
+    display: flex;
+    gap: 0.6rem;
+    margin-bottom: 1.5rem;
+}
+
+#quick-passe, #quick-duel, #quick-reb-def, #quick-reb-off-adv {
+    padding: 0.4rem 0.8rem;
+    border: 1px solid #2e8b50;
+    color: #2e8b50;
+    background: white;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+#quick-passe:hover, #quick-duel:hover, #quick-reb-def:hover, #quick-reb-off-adv:hover {
+    background: #2e8b50;
+    color: white;
+}
+
+.delete-action {
+    background: #fdecea;
+    border: 1px solid #f5c6cb;
+    color: #611a15;
+    border-radius: 4px;
+    padding: 0.2rem 0.5rem;
+    cursor: pointer;
+    font-size: 0.8rem;
+}
+
+#save-status {
+    margin-left: 0.75rem;
+    font-size: 0.9rem;
+    color: #555;
+}
