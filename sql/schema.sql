@@ -1,8 +1,3 @@
--- ============================================================
--- Schéma complet match_stats — à coller tel quel dans phpMyAdmin
--- (recrée la base depuis zéro, réinjecte tes données joueurs/matchs existantes)
--- ============================================================
-
 DROP DATABASE IF EXISTS match_stats;
 CREATE DATABASE match_stats CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE match_stats;
