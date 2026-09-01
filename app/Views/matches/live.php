@@ -261,7 +261,7 @@ document.getElementById('save-all').addEventListener('click', async () => {
 
 <?php
 $pageTitle = "Saisie live";
-$css = "live.css";
 $content = ob_get_clean();
+$css = "live.css";
 require __DIR__ . '/../layout.php';
 ?>
