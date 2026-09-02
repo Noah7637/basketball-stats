@@ -106,7 +106,7 @@ ob_start();
     </div>
 
 
-    <button type="submit">
+    <button class="submit" type="submit">
         Ajouter le joueur
     </button>
 

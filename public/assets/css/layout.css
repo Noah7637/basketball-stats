@@ -8,7 +8,6 @@
     box-sizing: border-box;
 }
 
-
 /* =========================
    BODY
 ========================= */
@@ -18,27 +17,27 @@ body {
     color: #1f2937;
     background-color: #f4f1eb;
     min-height: 100vh;
+    line-height: 1.5;
 }
 
-
 /* =========================
-   SIDEBAR
+SIDEBAR
 ========================= */
 
 .side-header {
     position: fixed;
     top: 0;
     left: 0;
-
     width: 220px;
     height: 100vh;
-
     padding: 28px 20px;
 
     background-color: #172033;
     color: #ffffff;
-}
 
+    display: flex;
+    flex-direction: column;
+}
 
 /* Logo / titre */
 
@@ -47,7 +46,6 @@ body {
     margin-bottom: 40px;
     color: #ffffff;
 }
-
 
 /* Navigation */
 
@@ -59,7 +57,6 @@ body {
 
 .side-header nav a {
     padding: 12px 14px;
-
     border-radius: 8px;
 
     color: #d9dee8;
@@ -76,6 +73,75 @@ body {
     color: #ff8a30;
 }
 
+/* =========================
+DECONNEXION
+========================= */
+
+.side-header form {
+    margin-top: auto;
+}
+
+.side-header .btnLogout {
+    width: 100%;
+
+    background-color: #ff4742;
+    border: 1px solid #ff4742;
+    border-radius: 6px;
+
+    color: #ffffff;
+    cursor: pointer;
+
+    font-size: 16px;
+    font-weight: 800;
+
+    padding: 12px 14px;
+
+    transition:
+        background-color 0.2s ease,
+        color 0.2s ease;
+}
+
+.side-header .btnLogout:hover {
+    background-color: transparent;
+    color: #ff4742;
+}
+
+.user-info {
+    margin-top: auto;
+    padding-top: 20px;
+
+    color: #d9dee8;
+    font-size: 0.9rem;
+    text-align: center;
+}
+
+.user-info form {
+    margin-top: 12px;
+}
+
+.user-info .btnLogout {
+    width: 100%;
+    padding: 11px 14px;
+
+    background-color: #ff4742;
+    border: 1px solid #ff4742;
+    border-radius: 6px;
+
+    color: #ffffff;
+    font-size: 15px;
+    font-weight: 700;
+
+    cursor: pointer;
+
+    transition:
+        background-color 0.2s ease,
+        color 0.2s ease;
+}
+
+.user-info .btnLogout:hover {
+    background-color: transparent;
+    color: #ff4742;
+}
 
 /* =========================
    MAIN
@@ -90,6 +156,17 @@ main {
     background-color: #f4f1eb;
 }
 
+/* =========================
+   LIENS
+========================= */
+
+a {
+    color: #e86f1f;
+}
+
+a:hover {
+    color: #c9560d;
+}
 
 /* =========================
    RESPONSIVE
@@ -104,6 +181,8 @@ main {
         height: auto;
 
         padding: 18px 20px;
+
+        box-shadow: none;
     }
 
     .side-header h1 {
@@ -112,6 +191,18 @@ main {
 
     .side-header nav {
         flex-direction: row;
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+
+    .side-header nav a {
+        flex: 1;
+        min-width: 120px;
+        text-align: center;
+    }
+
+    .side-header .btnLogout {
+        margin-top: 15px;
     }
 
     main {
@@ -119,3 +210,4 @@ main {
         padding: 25px 15px;
     }
 }
+```

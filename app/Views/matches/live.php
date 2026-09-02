@@ -260,7 +260,7 @@ document.getElementById('save-all').addEventListener('click', async () => {
 </script>
 
 <?php
-$pageTitle = "Saisie live";
+$title = "Saisie live";
 $content = ob_get_clean();
 $css = "live.css";
 require __DIR__ . '/../layout.php';

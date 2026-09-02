@@ -126,7 +126,7 @@ ob_start();
     </div>
 
 
-    <button type="submit">
+    <button class="submit" type="submit">
         Créer le match
     </button>
 

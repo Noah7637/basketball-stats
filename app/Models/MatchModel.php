@@ -6,11 +6,13 @@ use App\Core\Database;
 
 class MatchModel
 {
-    public static function all(): array
+    public static function all()
     {
         $pdo = Database::getInstance();
-        $stmt = $pdo->query("SELECT * FROM matches ORDER BY date_match DESC");
-        return $stmt->fetchAll();
+        $stmt = $pdo->prepare("SELECT * FROM matches WHERE user_id = :user_id ORDER BY date_match DESC");
+        $stmt->execute(['user_id' => $_SESSION['user_id']]);
+        $result = $stmt->fetchAll();
+        return $result ?: null ;
     }
 
     public static function moyenne(): array
@@ -65,8 +67,8 @@ FROM statistiques_collectives sc");
     {
         $pdo = Database::getInstance();
         $stmt = $pdo->prepare(
-            "INSERT INTO matches (adversaire, domicile, date_match, score_mon_equipe, score_adversaire)
-             VALUES (:adversaire, :domicile, :date_match, :score_mon_equipe, :score_adversaire)"
+            "INSERT INTO matches (user_id, adversaire, domicile, date_match, score_mon_equipe, score_adversaire)
+             VALUES (:user_id, :adversaire, :domicile, :date_match, :score_mon_equipe, :score_adversaire)"
         );
         $stmt->execute($data);
         return (int) $pdo->lastInsertId();

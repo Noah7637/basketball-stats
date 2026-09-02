@@ -11,10 +11,11 @@ class Auth
         }
     }
 
-    public static function login(int $userId): void
+    public static function login(int $userId, string $nomEquipe): void
     {
-        session_regenerate_id(true); // évite la fixation de session à la connexion
+        session_regenerate_id(true);
         $_SESSION['user_id'] = $userId;
+        $_SESSION['nom_equipe'] = $nomEquipe;
     }
 
     public static function logout(): void

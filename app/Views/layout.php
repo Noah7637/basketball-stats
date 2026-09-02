@@ -48,14 +48,15 @@
             </a>
 
         </nav>
-
+    <?php
+    if (\App\Core\Auth::check()) { ?>
         <div class="user-info">
             Connecté pour <?= htmlspecialchars($_SESSION['nom_equipe'] ?? '') ?>
             <form method="POST" action="/logout" style="display:inline">
-                <button type="submit">Déconnexion</button>
+                <button class="btnLogout" type="submit">Déconnexion</button>
             </form>
         </div>
-
+    <?php } ?>
     </header>
 
 

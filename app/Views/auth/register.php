@@ -38,6 +38,6 @@
 <?php
 $title = "Inscription";
 $content = ob_get_clean();
-$css = "index.css";
+$css = "auth.css";
 require __DIR__ . '/../layout.php';
 ?>

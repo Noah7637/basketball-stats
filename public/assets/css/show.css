@@ -187,3 +187,40 @@ main h1 {
 .borderless-header-table tbody tr:last-child td {
     border-bottom: none;
 }
+
+/* =========================
+   SAISIE LIVE DES STATS
+========================= */
+
+.live-stats-link {
+    display: inline-block;
+
+    margin: 10px 0 20px;
+    padding: 11px 18px;
+
+    background-color: #ff8a30;
+    color: #ffffff;
+
+    border-radius: 7px;
+
+    font-size: 1rem;
+    font-weight: 600;
+
+    text-decoration: none;
+
+    box-shadow: 0 3px 8px rgba(23, 32, 51, 0.12);
+
+    transition:
+        background-color 0.2s ease,
+        transform 0.15s ease,
+        box-shadow 0.2s ease;
+}
+
+.live-stats-link:hover {
+    background-color: #e86f1f;
+    color: #ffffff;
+
+    transform: translateY(-1px);
+
+    box-shadow: 0 5px 12px rgba(23, 32, 51, 0.16);
+}

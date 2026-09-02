@@ -24,13 +24,14 @@ class AuthController
             return;
         }
 
+        $nomEquipe = trim($_POST['nom_equipe']);
         $userId = UtilisateurModel::create(
             trim($_POST['email']),
             $_POST['mot_de_passe'],
-            trim($_POST['nom_equipe'])
+            $nomEquipe
         );
 
-        Auth::login($userId);
+        Auth::login($userId, $nomEquipe);
         header('Location: /');
         exit;
     }
@@ -54,7 +55,7 @@ class AuthController
             return;
         }
 
-        Auth::login($utilisateur['id']);
+        Auth::login($utilisateur['id'], $utilisateur['nom_equipe']);
         header('Location: /');
         exit;
     }

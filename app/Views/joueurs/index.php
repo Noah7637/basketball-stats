@@ -4,14 +4,19 @@ ob_start();
 
 ?>
 
-<h1>Mon équipe</h1>
+<h1><?php if ($_SESSION['nom_equipe']) {
+    echo $_SESSION['nom_equipe'];
+} else {
+    echo "Mon équipe";
+} ?>
+</h1>
 
 <p>
     <a href="/joueurs/create">+ Ajouter un joueur</a>
 </p>
 
 
-<?php if (empty($joueurs)): ?>
+<?php  if (empty($joueurs)): ?>
 
     <p class="empty-message">
         Aucun joueur pour le moment. Commence par en ajouter un.
@@ -118,7 +123,7 @@ ob_start();
 
 <?php
 
-$title = "Mon équipe";
+$title = $_SESSION['nom_equipe'] ?? "Mon équipe";
 
 $css = "index.css";
 

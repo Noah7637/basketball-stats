@@ -6,15 +6,15 @@ main h1 {
     color: #172033;
     font-size: 2rem;
     margin-bottom: 25px;
+    line-height: 1.2;
 }
-
 
 /* =========================
    ERREURS
 ========================= */
 
 .errors {
-    max-width: 700px;
+    max-width: 800px;
 
     margin-bottom: 25px;
     padding: 15px 20px;
@@ -25,30 +25,35 @@ main h1 {
     border-radius: 8px;
 
     color: #991b1b;
+
+    box-shadow: 0 2px 8px rgba(153, 27, 27, 0.05);
 }
 
 .errors li {
     margin-left: 15px;
 }
 
+.errors li + li {
+    margin-top: 5px;
+}
 
 /* =========================
    FORMULAIRE
 ========================= */
 
-form {
+main form {
+    width: 100%;
     max-width: 800px;
 
-    padding: 25px;
+    padding: 28px;
 
     background-color: #ffffff;
 
     border: 1px solid #e5e0d8;
-    border-radius: 10px;
+    border-radius: 12px;
 
-    box-shadow: 0 3px 12px rgba(23, 32, 51, 0.06);
+    box-shadow: 0 4px 16px rgba(23, 32, 51, 0.07);
 }
-
 
 /* =========================
    GROUPE
@@ -58,7 +63,7 @@ form {
     display: flex;
     flex-direction: column;
 
-    gap: 6px;
+    gap: 7px;
 
     margin-bottom: 18px;
 }
@@ -69,43 +74,54 @@ form {
     color: #374151;
 }
 
-
 /* =========================
-   INPUTS
+   INPUTS / SELECT
 ========================= */
 
 input[type="text"],
 input[type="date"],
-input[type="number"] {
+input[type="number"],
+select {
     width: 100%;
 
-    padding: 11px 12px;
+    min-height: 44px;
+
+    padding: 10px 12px;
 
     border: 1px solid #d1d5db;
     border-radius: 7px;
 
     background-color: #ffffff;
-
     color: #1f2937;
 
+    font-family: inherit;
     font-size: 1rem;
 
     outline: none;
 
     transition:
         border-color 0.2s ease,
-        box-shadow 0.2s ease;
+        box-shadow 0.2s ease,
+        background-color 0.2s ease;
+}
+
+select {
+    cursor: pointer;
 }
 
 input[type="text"]:focus,
 input[type="date"]:focus,
-input[type="number"]:focus {
+input[type="number"]:focus,
+select:focus {
     border-color: #ff8a30;
 
     box-shadow:
         0 0 0 3px rgba(255, 138, 48, 0.15);
 }
 
+input::placeholder {
+    color: #9ca3af;
+}
 
 /* =========================
    CHECKBOX
@@ -116,7 +132,6 @@ input[type="number"]:focus {
     display: flex;
 
     flex-direction: row;
-
     align-items: center;
 
     gap: 10px;
@@ -124,15 +139,20 @@ input[type="number"]:focus {
     cursor: pointer;
 }
 
+.form-checkbox label {
+    color: #374151;
+}
+
 input[type="checkbox"] {
     width: 17px;
     height: 17px;
+
+    flex-shrink: 0;
 
     accent-color: #ff8a30;
 
     cursor: pointer;
 }
-
 
 /* =========================
    SCORES
@@ -147,7 +167,6 @@ input[type="checkbox"] {
 .form-row .form-group {
     flex: 1;
 }
-
 
 /* =========================
    MODIFICATION
@@ -164,18 +183,22 @@ input[type="checkbox"] {
     flex: 1;
 }
 
+/* =========================
+   JOUEURS PRESENTS
+========================= */
 
-/* Joueurs présents */
-
-.right-form-group {
+.right-form-group,
+.form-section {
     padding: 20px;
 
     background-color: #f4f1eb;
 
-    border-radius: 9px;
+    border: 1px solid #e5e0d8;
+    border-radius: 10px;
 }
 
-.right-form-group h2 {
+.right-form-group h2,
+.form-section h2 {
     margin-bottom: 15px;
 
     color: #172033;
@@ -183,21 +206,42 @@ input[type="checkbox"] {
     font-size: 1.1rem;
 }
 
-.checkbox-line {
-    padding: 9px 0;
-
-    color: #374151;
+.checkbox-list {
+    display: flex;
+    flex-direction: column;
 }
 
+.checkbox-line {
+    padding: 10px 0;
+
+    color: #374151;
+
+    border-bottom: 1px solid #e5e0d8;
+
+    transition: color 0.2s ease;
+}
+
+.checkbox-line:last-child {
+    border-bottom: none;
+}
+
+.checkbox-line:hover {
+    color: #172033;
+}
+
+.checkbox-line span {
+    color: #6b7280;
+    font-size: 0.9rem;
+}
 
 /* =========================
    BOUTON
 ========================= */
 
-form button {
+main form .submit {
     margin-top: 10px;
 
-    padding: 11px 18px;
+    padding: 12px 20px;
 
     border: none;
     border-radius: 7px;
@@ -205,18 +249,31 @@ form button {
     background-color: #ff8a30;
     color: #ffffff;
 
+    font-family: inherit;
     font-size: 1rem;
     font-weight: 600;
 
     cursor: pointer;
 
-    transition: background-color 0.2s ease;
+    box-shadow: 0 2px 6px rgba(255, 138, 48, 0.2);
+
+    transition:
+        background-color 0.2s ease,
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
 }
 
-form button:hover {
+main form .submit:hover {
     background-color: #e86f1f;
+
+    transform: translateY(-1px);
+
+    box-shadow: 0 4px 10px rgba(255, 138, 48, 0.25);
 }
 
+form .submit:active {
+    transform: translateY(0);
+}
 
 /* =========================
    LIEN RETOUR
@@ -228,15 +285,32 @@ main > p:last-child {
 
 main > p:last-child a {
     color: #e86f1f;
+
     font-weight: 600;
+    text-decoration: none;
+
+    transition: color 0.2s ease;
 }
 
+main > p:last-child a:hover {
+    color: #c9560d;
+    text-decoration: underline;
+}
 
 /* =========================
    RESPONSIVE
 ========================= */
 
 @media (max-width: 700px) {
+
+    main h1 {
+        font-size: 1.65rem;
+    }
+
+    form {
+        padding: 20px;
+        border-radius: 10px;
+    }
 
     .fullform {
         flex-direction: column;
@@ -248,7 +322,13 @@ main > p:last-child a {
         gap: 0;
     }
 
-    form {
-        padding: 20px;
+    .right-form-group,
+    .form-section {
+        padding: 16px;
+    }
+
+    form .submit {
+        width: 100%;
     }
 }
+```

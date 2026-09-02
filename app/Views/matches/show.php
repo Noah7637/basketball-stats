@@ -39,8 +39,11 @@ ob_start();
     </p>
 
 </div>
-<br>
-<h4>Stats collectives</h4> <br> <a href="/match/live?id=<?= (int) $match['id'] ?>">Saisie live des stats</a> <br>
+<h4>Stats collectives</h4>
+
+<a class="live-stats-link" href="/match/live?id=<?= (int) $match['id'] ?>">
+    Saisie live des stats
+</a>
 
 <table class="borderless-header-table">
 

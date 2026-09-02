@@ -1,0 +1,151 @@
+/* =========================
+   AUTHENTIFICATION
+   Login + Register
+========================= */
+
+main {
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 30px;
+    background-color: #f4f1eb;
+}
+
+/* Carte */
+
+.auth-card {
+    width: 100%;
+    max-width: 450px;
+    padding: 35px;
+    background-color: #ffffff;
+    border: 1px solid #e5e0d8;
+    border-radius: 12px;
+    box-shadow: 0 8px 25px rgba(23, 32, 51, 0.10);
+}
+
+/* Titres */
+
+.auth-card h1 {
+    margin: 0 0 25px;
+    color: #172033;
+    font-size: 2rem;
+    text-align: center;
+}
+
+/* Erreurs */
+
+.errors {
+    margin: 0 0 20px;
+    padding: 12px 15px;
+    border: 1px solid #e7b5b5;
+    border-radius: 7px;
+    background-color: #fff1f1;
+    color: #a52a2a;
+}
+
+.errors li {
+    margin-left: 18px;
+}
+
+/* Champs */
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 7px;
+    color: #172033;
+    font-size: 0.95rem;
+    font-weight: 600;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 12px 14px;
+    box-sizing: border-box;
+
+    border: 1px solid #d6d1c9;
+    border-radius: 7px;
+
+    background-color: #ffffff;
+    color: #172033;
+
+    font-size: 1rem;
+    outline: none;
+
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.form-group input:focus {
+    border-color: #ff8a30;
+    box-shadow: 0 0 0 3px rgba(255, 138, 48, 0.15);
+}
+
+/* Bouton */
+
+.auth-card button {
+    width: 100%;
+    padding: 12px 18px;
+
+    border: none;
+    border-radius: 7px;
+
+    background-color: #ff8a30;
+    color: #ffffff;
+
+    font-size: 1rem;
+    font-weight: 700;
+
+    cursor: pointer;
+
+    transition: background-color 0.2s, transform 0.15s;
+}
+
+.auth-card button:hover {
+    background-color: #e86f1f;
+    transform: translateY(-1px);
+}
+
+/* Texte entre les pages */
+
+.auth-switch {
+    margin-top: 20px;
+    color: #5f6673;
+    text-align: center;
+    font-size: 0.95rem;
+}
+
+/* Liens */
+
+.auth-card a {
+    color: #e86f1f;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.auth-card a:hover {
+    color: #c9550f;
+    text-decoration: underline;
+}
+
+/* =========================
+   MOBILE
+========================= */
+
+@media (max-width: 600px) {
+
+    main {
+        padding: 20px;
+    }
+
+    .auth-card {
+        padding: 25px 20px;
+    }
+
+    .auth-card h1 {
+        font-size: 1.7rem;
+    }
+}

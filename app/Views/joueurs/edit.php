@@ -124,7 +124,7 @@ ob_start();
     </div>
 
 
-    <button type="submit">
+    <button class="submit" type="submit">
         Enregistrer les modifications
     </button>
 

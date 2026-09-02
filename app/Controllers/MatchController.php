@@ -64,6 +64,7 @@ class MatchController
         }
 
         $matchId = MatchModel::create([
+            'user_id' => $_SESSION['user_id'] !== '' ? (int) $_SESSION['user_id'] : null,
             'adversaire' => trim($_POST['adversaire']),
             'domicile' => isset($_POST['domicile']) ? 1 : 0,
             'date_match' => $_POST['date_match'],
@@ -109,7 +110,7 @@ class MatchController
             return;
         }
 
-        $joueurs = JoueurModel::all();
+        $joueurs = JoueurModel::all($_SESSION['user_id']);
         $selectionnes = array_column(SelectionModel::joueursDuMatch($matchId), 'id');
 
         require __DIR__ . '/../Views/matches/selection.php';
@@ -147,7 +148,7 @@ class MatchController
         }
 
         $errors = [];
-        $joueurs = JoueurModel::all();
+        $joueurs = JoueurModel::all($_SESSION['user_id']);
         $selectionnes = array_column(SelectionModel::joueursDuMatch($matchId), 'id');
 
         require __DIR__ . '/../Views/matches/edit.php';

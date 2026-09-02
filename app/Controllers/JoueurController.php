@@ -8,7 +8,8 @@ class JoueurController
 {
     public function index(): void
     {
-        $joueurs = JoueurModel::allWithStats();
+        $userID = $_SESSION["user_id"];
+        $joueurs = JoueurModel::allWithStats($userID);
         // $top = JoueurModel::topPerformers();
         require __DIR__ . '/../Views/joueurs/index.php';
     }
@@ -62,6 +63,7 @@ class JoueurController
         }
 
         JoueurModel::create([
+            'user_id' => $_SESSION['user_id'] !== '' ? (int) $_SESSION['user_id'] : null,
             'nom' => trim($_POST['nom']),
             'numero' => $_POST['numero'] !== '' ? (int) $_POST['numero'] : null,
             'poste' => $_POST['poste'] !== '' ? $_POST['poste'] : null,

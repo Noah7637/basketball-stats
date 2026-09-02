@@ -10,10 +10,10 @@ class JoueurModel
      * Tous les joueurs actifs avec leurs stats cumulées sur tous les matchs.
      * LEFT JOIN pour ne pas exclure un joueur qui n'a pas encore de stats saisies.
      */
-    public static function allWithStats(): array
+    public static function allWithStats(int $userId): array
     {
         $pdo = Database::getInstance();
-        $stmt = $pdo->query(
+        $stmt = $pdo->prepare(
             "SELECT
     j.id, j.nom, j.numero, j.poste,
     COALESCE(AVG(s.tirs_2pts_reussis*2 + s.tirs_3pts_reussis*3 + s.lancers_francs_reussis), 0) AS moyenne_points,
@@ -30,12 +30,12 @@ class JoueurModel
     COUNT(DISTINCT s.match_id) AS matchs_joues
 FROM joueurs j
 LEFT JOIN statistiques s ON s.joueur_id = j.id
-WHERE j.actif = 1
+WHERE j.user_id = :userId
 GROUP BY j.id
 ORDER BY moyenne_points DESC"
         );
-        $result = $stmt->fetchAll();
-        return $result;
+         $stmt->execute(['userId' => $userId]);
+        return $stmt->fetchAll();
     }
 
     public static function joueurWithStats(int $id): array
@@ -75,11 +75,13 @@ GROUP BY j.id, j.nom, j.numero, j.poste"
         return $result ?: null;
     }
 
-    public static function all(): array
+    public static function all(int $user_id): array
     {
         $pdo = Database::getInstance();
-        $stmt = $pdo->query("SELECT * FROM joueurs WHERE actif = 1 ORDER BY nom");
-        return $stmt->fetchAll();
+        $stmt = $pdo->prepare("SELECT * FROM joueurs WHERE user_id = :userId ORDER BY nom");
+        $stmt->execute(['userId' => $_SESSION['user_id']]);
+        $result = $stmt->fetchAll();
+        return $result ?: null ;
     }
 
     public static function statsParMatch(int $id): array
@@ -113,7 +115,7 @@ GROUP BY j.id, j.nom, j.numero, j.poste"
     {
         $pdo = Database::getInstance();
         $stmt = $pdo->prepare(
-            "INSERT INTO joueurs (nom, numero, poste) VALUES (:nom, :numero, :poste)"
+            "INSERT INTO joueurs (user_id, nom, numero, poste) VALUES (:user_id, :nom, :numero, :poste)"
         );
         $stmt->execute($data);
         return (int) $pdo->lastInsertId();
