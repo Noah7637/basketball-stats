@@ -1,0 +1,254 @@
+/* =========================
+   TITRE
+========================= */
+
+main h1 {
+    color: #172033;
+    font-size: 2rem;
+    margin-bottom: 25px;
+}
+
+
+/* =========================
+   ERREURS
+========================= */
+
+.errors {
+    max-width: 700px;
+
+    margin-bottom: 25px;
+    padding: 15px 20px;
+
+    background-color: #fef2f2;
+
+    border: 1px solid #fecaca;
+    border-radius: 8px;
+
+    color: #991b1b;
+}
+
+.errors li {
+    margin-left: 15px;
+}
+
+
+/* =========================
+   FORMULAIRE
+========================= */
+
+form {
+    max-width: 800px;
+
+    padding: 25px;
+
+    background-color: #ffffff;
+
+    border: 1px solid #e5e0d8;
+    border-radius: 10px;
+
+    box-shadow: 0 3px 12px rgba(23, 32, 51, 0.06);
+}
+
+
+/* =========================
+   GROUPE
+========================= */
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+
+    gap: 6px;
+
+    margin-bottom: 18px;
+}
+
+.form-group label {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #374151;
+}
+
+
+/* =========================
+   INPUTS
+========================= */
+
+input[type="text"],
+input[type="date"],
+input[type="number"] {
+    width: 100%;
+
+    padding: 11px 12px;
+
+    border: 1px solid #d1d5db;
+    border-radius: 7px;
+
+    background-color: #ffffff;
+
+    color: #1f2937;
+
+    font-size: 1rem;
+
+    outline: none;
+
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+input[type="text"]:focus,
+input[type="date"]:focus,
+input[type="number"]:focus {
+    border-color: #ff8a30;
+
+    box-shadow:
+        0 0 0 3px rgba(255, 138, 48, 0.15);
+}
+
+
+/* =========================
+   CHECKBOX
+========================= */
+
+.form-checkbox label,
+.checkbox-line {
+    display: flex;
+
+    flex-direction: row;
+
+    align-items: center;
+
+    gap: 10px;
+
+    cursor: pointer;
+}
+
+input[type="checkbox"] {
+    width: 17px;
+    height: 17px;
+
+    accent-color: #ff8a30;
+
+    cursor: pointer;
+}
+
+
+/* =========================
+   SCORES
+========================= */
+
+.form-row {
+    display: flex;
+
+    gap: 20px;
+}
+
+.form-row .form-group {
+    flex: 1;
+}
+
+
+/* =========================
+   MODIFICATION
+========================= */
+
+.fullform {
+    display: flex;
+
+    gap: 40px;
+}
+
+.left-form-group,
+.right-form-group {
+    flex: 1;
+}
+
+
+/* Joueurs présents */
+
+.right-form-group {
+    padding: 20px;
+
+    background-color: #f4f1eb;
+
+    border-radius: 9px;
+}
+
+.right-form-group h2 {
+    margin-bottom: 15px;
+
+    color: #172033;
+
+    font-size: 1.1rem;
+}
+
+.checkbox-line {
+    padding: 9px 0;
+
+    color: #374151;
+}
+
+
+/* =========================
+   BOUTON
+========================= */
+
+form button {
+    margin-top: 10px;
+
+    padding: 11px 18px;
+
+    border: none;
+    border-radius: 7px;
+
+    background-color: #ff8a30;
+    color: #ffffff;
+
+    font-size: 1rem;
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition: background-color 0.2s ease;
+}
+
+form button:hover {
+    background-color: #e86f1f;
+}
+
+
+/* =========================
+   LIEN RETOUR
+========================= */
+
+main > p:last-child {
+    margin-top: 20px;
+}
+
+main > p:last-child a {
+    color: #e86f1f;
+    font-weight: 600;
+}
+
+
+/* =========================
+   RESPONSIVE
+========================= */
+
+@media (max-width: 700px) {
+
+    .fullform {
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .form-row {
+        flex-direction: column;
+        gap: 0;
+    }
+
+    form {
+        padding: 20px;
+    }
+}

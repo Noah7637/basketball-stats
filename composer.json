@@ -1,0 +1,13 @@
+{
+    "name": "noah/match-stats",
+    "description": "Application de suivi de statistiques de matchs",
+    "type": "project",
+    "autoload": {
+        "psr-4": {
+            "App\\": "app/"
+        }
+    },
+    "require": {
+        "php": ">=8.0"
+    }
+}

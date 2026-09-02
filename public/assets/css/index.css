@@ -1,0 +1,197 @@
+/* =========================
+   TITRE
+========================= */
+
+main h1 {
+    color: #172033;
+    font-size: 2rem;
+    margin-bottom: 25px;
+}
+
+
+/* =========================
+   BOUTONS D'ACTION
+========================= */
+
+main > p {
+    margin-bottom: 25px;
+}
+
+main > p a {
+    display: inline-block;
+
+    padding: 10px 15px;
+
+    background-color: #ff8a30;
+    color: #ffffff;
+
+    border-radius: 7px;
+
+    font-weight: 600;
+
+    transition: background-color 0.2s ease;
+}
+
+main > p a:hover {
+    background-color: #e86f1f;
+}
+
+
+/* =========================
+   MESSAGE VIDE
+========================= */
+
+.empty-message {
+    padding: 25px;
+
+    background-color: #ffffff;
+
+    border: 1px solid #e5e0d8;
+    border-radius: 9px;
+
+    color: #6b7280;
+}
+
+
+/* =========================
+   TABLEAU
+========================= */
+
+.borderless-header-table {
+    width: 100%;
+
+    border-collapse: separate;
+    border-spacing: 0;
+
+    background-color: #ffffff;
+
+    border: 1px solid #ded9d0;
+    border-radius: 10px;
+
+    overflow: hidden;
+
+    box-shadow: 0 3px 12px rgba(23, 32, 51, 0.06);
+
+    font-size: 0.9rem;
+}
+
+
+/* =========================
+   EN-TÊTE
+========================= */
+
+.borderless-header-table thead {
+    background-color: #172033;
+    color: #ffffff;
+}
+
+.borderless-header-table th {
+    padding: 14px 12px;
+
+    font-size: 0.82rem;
+    font-weight: 600;
+
+    white-space: nowrap;
+}
+
+
+/* =========================
+   CELLULES
+========================= */
+
+.borderless-header-table td {
+    padding: 13px 12px;
+
+    text-align: center;
+
+    border-bottom: 1px solid #eeeae4;
+
+    color: #374151;
+}
+
+
+/* =========================
+   LIGNES
+========================= */
+
+.borderless-header-table tbody tr {
+    transition: background-color 0.15s ease;
+}
+
+.borderless-header-table tbody tr:hover {
+    background-color: #fff7ef;
+}
+
+.borderless-header-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+
+/* =========================
+   LIENS
+========================= */
+
+.borderless-header-table a {
+    color: #e86f1f;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.borderless-header-table a:hover {
+    color: #c9550f;
+}
+
+
+/* =========================
+   RESULTAT
+========================= */
+
+.result-win {
+    color: #15803d !important;
+    font-weight: 700;
+}
+
+.result-loss {
+    color: #dc2626 !important;
+    font-weight: 700;
+}
+
+.result-draw {
+    color: #6b7280 !important;
+    font-weight: 600;
+}
+
+
+/* =========================
+   ACTIONS
+========================= */
+
+.action-delete {
+    color: #dc2626 !important;
+}
+
+.action-delete:hover {
+    color: #991b1b !important;
+}
+
+.action-edit {
+    color: #15803d !important;
+}
+
+.action-edit:hover {
+    color: #166534 !important;
+}
+
+
+/* =========================
+   MOBILE
+========================= */
+
+@media (max-width: 900px) {
+
+    .borderless-header-table {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+    }
+}
