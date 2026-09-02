@@ -3,7 +3,7 @@
         'name' => 'noah/match-stats',
         'pretty_version' => 'dev-main',
         'version' => 'dev-main',
-        'reference' => '7b6be37fc8018aac62685a9fa43d0d542022a38a',
+        'reference' => '1d4432a0ae0bd0054e73327187e0fe28107bd4e2',
         'type' => 'project',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -13,7 +13,7 @@
         'noah/match-stats' => array(
             'pretty_version' => 'dev-main',
             'version' => 'dev-main',
-            'reference' => '7b6be37fc8018aac62685a9fa43d0d542022a38a',
+            'reference' => '1d4432a0ae0bd0054e73327187e0fe28107bd4e2',
             'type' => 'project',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
