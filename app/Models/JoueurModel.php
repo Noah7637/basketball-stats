@@ -93,6 +93,7 @@ GROUP BY j.id, j.nom, j.numero, j.poste"
             m.date_match AS date,
             m.score_mon_equipe,
             m.score_adversaire,
+            s.match_id,
             s.passes_decisives,
             s.tirs_2pts_reussis,
             s.tirs_2pts_tentes,

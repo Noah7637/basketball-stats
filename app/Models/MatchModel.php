@@ -54,6 +54,64 @@ FROM statistiques_collectives sc");
     return $stmt->fetch();
 }
 
+    public static function statParPeriode(int $id): array|false
+{
+    $pdo = Database::getInstance();
+    $stmt = $pdo->prepare("SELECT
+    sc.match_id,
+    sc.quart_temps,
+
+    COALESCE(
+        SUM(sc.points) / NULLIF(SUM(sc.nb_possessions), 0),
+        0
+    ) AS pts_par_possession,
+
+    COALESCE(
+        SUM(sc.points_transition) / NULLIF(SUM(sc.possessions_transition), 0),
+        0
+    ) AS pts_par_transition,
+
+    COALESCE(
+        SUM(sc.points_jeu_pose) / NULLIF(SUM(sc.possessions_jeu_pose), 0),
+        0
+    ) AS pts_par_jeu_pose,
+
+    COALESCE(SUM(sc.lancers_francs_reussis), 0) AS lf_reussis,
+
+    COALESCE(SUM(sc.lancers_francs_tentes), 0) AS lf_tentes,
+
+    COALESCE(
+        SUM(sc.lancers_francs_reussis) /
+        NULLIF(SUM(sc.lancers_francs_tentes), 0),
+        0
+    ) AS pourcentage_lf,
+
+    COALESCE(SUM(sc.nb_contre_attaques), 0) AS contre_attaques,
+
+    COALESCE(
+        SUM(sc.nb_contre_attaques_reussies) /
+        NULLIF(SUM(sc.nb_contre_attaques), 0),
+        0
+    ) AS pourcentage_contre_attaques,
+
+    COALESCE(SUM(sc.rebonds_defensifs), 0) AS reb_def,
+
+    COALESCE(SUM(sc.rebonds_offensifs_adversaires), 0) AS reb_off_adv
+
+FROM statistiques_collectives sc
+
+WHERE sc.match_id = :id
+
+GROUP BY
+    sc.match_id,
+    sc.quart_temps
+
+ORDER BY
+    sc.quart_temps;");
+    $stmt->execute(['id' => $id]);
+    return $stmt->fetch();
+}
+
     public static function find(int $id): ?array
     {
         $pdo = Database::getInstance();

@@ -35,9 +35,9 @@ ob_start();
                 <td><?= number_format($moyenne["pts_par_transition"], 2) ?></td>
                 <td><?= number_format($moyenne["pts_par_jeu_pose"], 2) ?></td>
                 <td><?= $moyenne["lf_reussis"] ?>/<?= $moyenne["lf_tentes"] ?></td>
-                <td><?= (($moyenne["pourcentage_lf"])*100) ?></td>
+                <td><?= (($moyenne["pourcentage_lf"])*100) ?>%</td>
                 <td><?= number_format($moyenne["contre_attaques"], 1) ?></td>
-                <td><?= number_format($moyenne["pourcentage_contre_attaques"], 1) ?></td>
+                <td><?= (($moyenne["pourcentage_contre_attaques"])*100) ?>%</td>
                 <td><?= number_format($moyenne["reb_def"], 1) ?></td>
                 <td><?= number_format($moyenne["reb_off_adv"], 1) ?></td>
             </tr>

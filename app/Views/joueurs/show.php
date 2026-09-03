@@ -95,7 +95,7 @@ ob_start();
             <tbody>
                 <?php foreach ($stats_match as $s): ?>
                     <tr>
-                        <td><?= htmlspecialchars($s['adversaire']) ?></td>
+                        <td><a href="/match?id=<?= (int) $s['match_id'] ?>"><?= htmlspecialchars($s['adversaire']) ?></a></td>
                         <td><?= htmlspecialchars($s['date']) ?></td>
                         <td>
                             <?php if ($s['score_mon_equipe'] > $s['score_adversaire']): ?>

@@ -94,13 +94,20 @@ main h1 {
     padding: 12px 15px;
 
     background-color: #f4f1eb;
-
+    
     border-radius: 7px;
 
     color: #374151;
     font-weight: 500;
 }
 
+.players-list a {
+    text-decoration: none;
+}
+
+.players-list a li:hover {
+    background-color: #d4d4d4;
+}
 
 /* =========================
    RETOUR
