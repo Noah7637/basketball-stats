@@ -75,6 +75,48 @@ ob_start();
         </tbody>
 </table>
 
+<h4>Stats par période</h4>
+
+<table class="borderless-header-table">
+
+<thead>
+            <tr>
+                <th>Quart-temps</th>
+                <th>Pts/possession</th>
+                <th>Pts/transition</th>
+                <th>Pts/jeu posé</th>
+                <th>LF</th>
+                <th>%LF</th>
+                <th>Contre attaque</th>
+                <th>%Contre attaque</th>
+                <th>Reb def</th>
+                <th>Reb off adv</th>
+            </tr>
+        </thead>
+        <tbody>
+
+<?php
+    $i = 0;
+    foreach ($periode as $p):
+    $i++
+?>
+    
+            <tr>
+                <td><?= $i ?></td>
+                <td><?= number_format($p["pts_par_possession"], 2) ?></td>
+                <td><?= number_format($p["pts_par_transition"], 2) ?></td>
+                <td><?= number_format($p["pts_par_jeu_pose"], 2) ?></td>
+                <td><?= $p["lf_reussis"] ?>/<?= $p["lf_tentes"] ?></td>
+                <td><?= (($p["pourcentage_lf"])*100) ?>%</td>
+                <td><?= $p["contre_attaques"] ?></td>
+                <td><?= (($p["pourcentage_contre_attaques"])*100) ?>%</td>
+                <td><?= $p["reb_def"] ?></td>
+                <td><?= $p["reb_off_adv"] ?></td>
+            </tr>
+<?php endforeach ?>
+        </tbody>
+</table>
+
 <br>
 <section class="players-section">
 

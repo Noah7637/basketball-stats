@@ -41,6 +41,7 @@ $router->get('/match/create', [MatchController::class, 'create']);
 $router->post('/match/store', [MatchController::class, 'store']);
 $router->get('/match/edit', [MatchController::class, 'edit']);
 $router->post('/match/update', [MatchController::class, 'update']);
+$router->get('/match/delete', [MatchController::class, 'delete']);
 $router->get('/match/selection', [MatchController::class, 'selectionJoueurs']);
 $router->post('/match/selection', [MatchController::class, 'saveSelection']);
 $router->get('/match/live', [MatchController::class, 'live']);

@@ -13,6 +13,7 @@ class MatchController
     {
         $matches = MatchModel::all();
         $moyenne = MatchModel::moyenne();
+        $periode = MatchModel::moyenneParPeriode();
         require __DIR__ . '/../Views/matches/index.php';
     }
 
@@ -22,6 +23,7 @@ class MatchController
         $match = MatchModel::find($id);
         $joueurs = SelectionModel::joueursDuMatch($id);
         $stats = MatchModel::statMatch($id);
+        $periode = MatchModel::statParPeriode($id);
 
         if (!$match) {
             http_response_code(404);
