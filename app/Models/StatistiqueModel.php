@@ -23,10 +23,6 @@ class StatistiqueModel
         return $result;
     }
 
-    /**
-     * Le journal complet et permanent d'un match, trié par quart-temps puis
-     * par ordre de saisie (id croissant).
-     */
     public static function journalPourMatch(int $matchId): array
     {
         $pdo = Database::getInstance();
@@ -41,11 +37,6 @@ class StatistiqueModel
         return $stmt->fetchAll();
     }
 
-    /**
-     * Enregistre un nouveau lot d'actions saisies en live : les ajoute au
-     * journal permanent, puis reconstruit entièrement les totaux du match
-     * (individuels et collectifs) à partir de la totalité du journal.
-     */
     public static function sauvegarderLot(int $matchId, array $actions): void
     {
         if (empty($actions)) {
@@ -57,8 +48,8 @@ class StatistiqueModel
 
         try {
             $stmtLog = $pdo->prepare(
-                "INSERT INTO actions_log (match_id, joueur_id, quart_temps, type, reussi, type_possession)
-                 VALUES (:match_id, :joueur_id, :quart_temps, :type, :reussi, :type_possession)"
+                "INSERT INTO actions_log (match_id, joueur_id, quart_temps, type, reussi, type_possession, valeur_temps)
+                 VALUES (:match_id, :joueur_id, :quart_temps, :type, :reussi, :type_possession, :valeur_temps)"
             );
 
             foreach ($actions as $a) {
@@ -69,6 +60,7 @@ class StatistiqueModel
                     'type' => $a['type'],
                     'reussi' => isset($a['reussi']) ? ($a['reussi'] ? 1 : 0) : null,
                     'type_possession' => $a['type_possession'] ?? null,
+                    'valeur_temps' => isset($a['valeur_temps']) && $a['valeur_temps'] !== null ? (int) $a['valeur_temps'] : null,
                 ]);
             }
 
@@ -81,11 +73,6 @@ class StatistiqueModel
         }
     }
 
-    /**
-     * Supprime une action précise du journal (vérifie qu'elle appartient bien
-     * à un match de l'utilisateur connecté), puis reconstruit les totaux du
-     * match à partir de ce qu'il reste dans le journal.
-     */
     public static function supprimerAction(int $actionId, int $userId): bool
     {
         $pdo = Database::getInstance();
@@ -99,7 +86,7 @@ class StatistiqueModel
         $row = $stmt->fetch();
 
         if (!$row) {
-            return false; // action inexistante ou n'appartenant pas à cet utilisateur
+            return false;
         }
 
         $matchId = (int) $row['match_id'];
@@ -117,15 +104,9 @@ class StatistiqueModel
         }
     }
 
-    /**
-     * Reconstruit entièrement statistiques et statistiques_collectives pour
-     * un match, à partir de la totalité de son journal (actions_log). Appelée
-     * après chaque ajout ou suppression, pour que les totaux ne puissent
-     * jamais diverger du détail brut.
-     */
     private static function recalculerAgregats(PDO $pdo, int $matchId): void
     {
-        $stmt = $pdo->prepare("SELECT * FROM actions_log WHERE match_id = :match_id");
+        $stmt = $pdo->prepare("SELECT * FROM actions_log WHERE match_id = :match_id ORDER BY id");
         $stmt->execute(['match_id' => $matchId]);
         $toutesActions = $stmt->fetchAll();
 
@@ -137,8 +118,8 @@ class StatistiqueModel
         $stmtJoueur = $pdo->prepare(
             "INSERT INTO statistiques
                 (match_id, joueur_id, tirs_2pts_tentes, tirs_2pts_reussis, tirs_3pts_tentes, tirs_3pts_reussis,
-                 lancers_francs_tentes, lancers_francs_reussis, passes_decisives, duels_defensifs_gagnes)
-             VALUES (:match_id, :joueur_id, :t2t, :t2r, :t3t, :t3r, :lft, :lfr, :pd, :ddg)"
+                 lancers_francs_tentes, lancers_francs_reussis, passes_decisives, duels_defensifs_gagnes, minutes_jouees)
+             VALUES (:match_id, :joueur_id, :t2t, :t2r, :t3t, :t3r, :lft, :lfr, :pd, :ddg, :mj)"
         );
 
         foreach ($individuel as $joueurId => $s) {
@@ -151,6 +132,7 @@ class StatistiqueModel
                 't3t' => $s['tirs_3pts_tentes'], 't3r' => $s['tirs_3pts_reussis'],
                 'lft' => $s['lancers_francs_tentes'], 'lfr' => $s['lancers_francs_reussis'],
                 'pd' => $s['passes_decisives'], 'ddg' => $s['duels_defensifs_gagnes'],
+                'mj' => $s['minutes_jouees'],
             ]);
         }
 
@@ -178,9 +160,9 @@ class StatistiqueModel
     }
 
     /**
-     * Pure fonction d'agrégation : prend une liste d'actions (venant du POST
-     * JS ou relue depuis actions_log, les deux ont les mêmes clés) et calcule
-     * les totaux individuels et collectifs. Ne touche pas à la base.
+     * Pure fonction d'agrégation. Les actions doivent être fournies triées par
+     * ordre chronologique (id croissant) pour que l'appariement entrée/sortie
+     * du temps de jeu fonctionne correctement.
      */
     private static function agregerActions(array $actions): array
     {
@@ -188,7 +170,7 @@ class StatistiqueModel
             'tirs_2pts_tentes', 'tirs_2pts_reussis',
             'tirs_3pts_tentes', 'tirs_3pts_reussis',
             'lancers_francs_tentes', 'lancers_francs_reussis',
-            'passes_decisives', 'duels_defensifs_gagnes',
+            'passes_decisives', 'duels_defensifs_gagnes', 'minutes_jouees',
         ];
         $champsCollectifs = [
             'points', 'points_transition', 'points_jeu_pose', 'points_contre_attaque',
@@ -200,6 +182,7 @@ class StatistiqueModel
 
         $individuel = [];
         $collectif = [];
+        $entreesEnCours = []; // joueur_id => minute d'entrée, en attente d'une sortie
 
         foreach ($actions as $a) {
             $quart = (int) $a['quart_temps'];
@@ -207,6 +190,7 @@ class StatistiqueModel
             $reussi = (bool) ($a['reussi'] ?? false);
             $typePossession = $a['type_possession'] ?? null;
             $joueurId = isset($a['joueur_id']) && $a['joueur_id'] !== null ? (int) $a['joueur_id'] : null;
+            $valeurTemps = isset($a['valeur_temps']) && $a['valeur_temps'] !== null ? (int) $a['valeur_temps'] : null;
 
             $collectif[$quart] ??= array_fill_keys($champsCollectifs, 0);
 
@@ -260,6 +244,19 @@ class StatistiqueModel
                 $collectif[$quart]['rebonds_defensifs']++;
             } elseif ($type === 'rebond_off_adv') {
                 $collectif[$quart]['rebonds_offensifs_adversaires']++;
+            } elseif ($type === 'entree') {
+                if ($joueurId !== null && $valeurTemps !== null) {
+                    $entreesEnCours[$joueurId] = $valeurTemps;
+                }
+            } elseif ($type === 'sortie') {
+                if ($joueurId !== null && $valeurTemps !== null && isset($entreesEnCours[$joueurId])) {
+                    $duree = $valeurTemps - $entreesEnCours[$joueurId];
+                    if ($duree > 0) {
+                        $individuel[$joueurId] ??= array_fill_keys($champsIndividuels, 0);
+                        $individuel[$joueurId]['minutes_jouees'] += $duree;
+                    }
+                    unset($entreesEnCours[$joueurId]);
+                }
             }
         }
 

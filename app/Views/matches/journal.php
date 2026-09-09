@@ -68,7 +68,8 @@
 <?php endif; ?>
 
 <?php
-$pageTitle = "Journal du match";
+$title = "Journal du match";
+$css = "live.css";
 $content = ob_get_clean();
-require __DIR__ . '/../partials/layout.php';
+require __DIR__ . '/../layout.php';
 ?>

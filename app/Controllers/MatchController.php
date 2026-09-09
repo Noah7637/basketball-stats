@@ -243,7 +243,7 @@ public function liveSave(): void
 public function journal(): void
     {
         $matchId = (int) ($_GET['id'] ?? 0);
-        $match = MatchModel::find($matchId, Auth::id());
+        $match = MatchModel::find($matchId);
 
         if (!$match) {
             http_response_code(404);

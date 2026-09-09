@@ -1,0 +1,36 @@
+h1 {
+    margin-bottom: 0.5rem;
+}
+
+.borderless-header-table {
+    margin-top: 1rem;
+}
+
+.live-quart-separator td {
+    background: #eef4ef;
+    color: #1f5c34;
+    font-weight: 700;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    padding: 0.5rem 0.9rem;
+}
+
+.borderless-header-table td form {
+    margin: 0;
+}
+
+.delete-action {
+    background: #fdecea;
+    border: 1px solid #f5c6cb;
+    color: #611a15;
+    border-radius: 4px;
+    padding: 0.25rem 0.6rem;
+    cursor: pointer;
+    font-size: 0.78rem;
+    font-weight: 500;
+}
+
+.delete-action:hover {
+    background: #f8d7da;
+}

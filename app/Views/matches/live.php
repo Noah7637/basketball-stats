@@ -23,20 +23,57 @@
     </div>
 
     <button type="button" id="nouvelle-possession">+ Nouvelle possession</button>
+    <button type="button" id="toggle-stats-panel">📊 Stats du match</button>
 </div>
 
-<h2>Joueur</h2>
-<div class="live-players">
-    <?php foreach ($joueurs as $j): ?>
-        <button type="button" class="live-player-btn" data-joueur-id="<?= (int) $j['id'] ?>">
-            <?= htmlspecialchars($j['nom']) ?>
-            <?= $j['numero'] !== null ? '(#' . (int) $j['numero'] . ')' : '' ?>
-        </button>
-    <?php endforeach; ?>
+<div id="stats-panel" class="stats-panel" style="display:none;">
+    <h2>Stats en direct (non enregistrées)</h2>
+    <p class="stats-panel-note">Calculées à partir des actions du journal ci-dessous, pas encore sauvegardées en base.</p>
+
+    <h3>Score par quart-temps</h3>
+    <table class="borderless-header-table">
+        <thead>
+            <tr><th>Q1</th><th>Q2</th><th>Q3</th><th>Q4</th><th>Total</th></tr>
+        </thead>
+        <tbody>
+            <tr id="stats-points-quart"><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+        </tbody>
+    </table>
+
+    <h3>Par joueur</h3>
+    <table class="borderless-header-table">
+        <thead>
+            <tr><th>Joueur</th><th>Pts</th><th>2pts</th><th>3pts</th><th>LF</th><th>Passes</th><th>Duels</th><th>Sur le terrain</th></tr>
+        </thead>
+        <tbody id="stats-joueurs"></tbody>
+    </table>
+</div>
+
+<div class="live-court-split">
+    <div class="live-court-column">
+        <h2>🟢 Sur le terrain</h2>
+        <div class="live-players" id="joueurs-terrain">
+            <p class="live-empty-note">Aucun joueur sur le terrain.</p>
+        </div>
+    </div>
+
+    <div class="live-court-column">
+        <h2>⚪ Sur le banc</h2>
+        <div class="live-players" id="joueurs-banc"></div>
+    </div>
 </div>
 
 <div id="live-panel" class="live-panel" style="display:none;">
     <h2 id="live-player-name"></h2>
+
+    <div class="live-action-group live-substitution-group">
+        <div class="form-group">
+            <label for="minute-match">Minute du match (pour l'entrée/sortie)</label>
+            <input type="number" id="minute-match" min="0" max="60" value="0" style="width:100px">
+        </div>
+        <button type="button" id="btn-entree" class="live-substitution-btn">🟢 Entrée sur le terrain</button>
+        <button type="button" id="btn-sortie" class="live-substitution-btn">⚪ Sortie du terrain</button>
+    </div>
 
     <div class="live-action-group">
         <span class="live-action-label">Type de tir</span>
@@ -90,17 +127,31 @@
 
 <script>
 const matchId = <?= (int) $match['id'] ?>;
+const tousLesJoueurs = <?= json_encode($joueurs) ?>;
 const joueursNoms = <?= json_encode(array_column($joueurs, 'nom', 'id')) ?>;
 
 let actions = [];
 let joueurActifId = null;
 let selection = { type: null, reussi: null };
+let joueursSurLeTerrain = new Set();
+
+const storageKey = `live-actions-match-${matchId}`;
+
+const sauvegarde = localStorage.getItem(storageKey);
+if (sauvegarde) {
+    try {
+        actions = JSON.parse(sauvegarde);
+    } catch (e) {
+        actions = [];
+    }
+}
 
 const libellesType = {
     '2pts': '2 pts', '3pts': '3 pts', 'lf': 'Lancer franc',
     'possession': 'Nouvelle possession',
     'passe': 'Passe décisive', 'duel': 'Duel défensif gagné',
     'rebond_def': 'Rebond défensif (équipe)', 'rebond_off_adv': 'Rebond off. adverse (équipe)',
+    'entree': 'Entrée sur le terrain', 'sortie': 'Sortie du terrain',
 };
 const libellesPossession = { transition: 'Transition', jeu_pose: 'Jeu posé', contre_attaque: 'Contre-attaque' };
 
@@ -112,6 +163,61 @@ function possessionActive() {
     return document.getElementById('possession-select').value;
 }
 
+function minuteMatch() {
+    return parseInt(document.getElementById('minute-match').value, 10) || 0;
+}
+
+function recalculerJoueursSurLeTerrain() {
+    joueursSurLeTerrain = new Set();
+    actions.forEach(a => {
+        if (a.type === 'entree') joueursSurLeTerrain.add(a.joueur_id);
+        if (a.type === 'sortie') joueursSurLeTerrain.delete(a.joueur_id);
+    });
+    renderJoueursColonnes();
+}
+
+// Affiche les joueurs répartis dans les deux colonnes (terrain / banc)
+function renderJoueursColonnes() {
+    const terrainEl = document.getElementById('joueurs-terrain');
+    const bancEl = document.getElementById('joueurs-banc');
+
+    const surLeTerrain = tousLesJoueurs.filter(j => joueursSurLeTerrain.has(j.id));
+    const surLeBanc = tousLesJoueurs.filter(j => !joueursSurLeTerrain.has(j.id));
+
+    terrainEl.innerHTML = surLeTerrain.length
+        ? surLeTerrain.map(j => boutonJoueurHtml(j)).join('')
+        : '<p class="live-empty-note">Aucun joueur sur le terrain.</p>';
+
+    bancEl.innerHTML = surLeBanc.map(j => boutonJoueurHtml(j)).join('');
+
+    attacherEcouteursJoueurs();
+
+    // Réapplique le style "actif" si un joueur était sélectionné
+    if (joueurActifId) {
+        const btn = document.querySelector(`.live-player-btn[data-joueur-id="${joueurActifId}"]`);
+        if (btn) btn.classList.add('active');
+    }
+}
+
+function boutonJoueurHtml(j) {
+    const numero = j.numero !== null ? ` (#${j.numero})` : '';
+    return `<button type="button" class="live-player-btn" data-joueur-id="${j.id}">${j.nom}${numero}</button>`;
+}
+
+function attacherEcouteursJoueurs() {
+    document.querySelectorAll('.live-player-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.live-player-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            joueurActifId = btn.dataset.joueurId;
+            document.getElementById('live-player-name').textContent = joueursNoms[joueurActifId];
+            document.getElementById('live-panel').style.display = 'block';
+            resetSelection();
+            updateSubstitutionButtons();
+        });
+    });
+}
+
 document.getElementById('nouvelle-possession').addEventListener('click', () => {
     actions.push({
         id: Date.now() + Math.random(),
@@ -120,19 +226,49 @@ document.getElementById('nouvelle-possession').addEventListener('click', () => {
         type: 'possession',
         reussi: null,
         type_possession: possessionActive(),
+        valeur_temps: null,
     });
     render();
 });
 
-document.querySelectorAll('.live-player-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-        document.querySelectorAll('.live-player-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        joueurActifId = btn.dataset.joueurId;
-        document.getElementById('live-player-name').textContent = joueursNoms[joueurActifId];
-        document.getElementById('live-panel').style.display = 'block';
-        resetSelection();
+function updateSubstitutionButtons() {
+    const surLeTerrain = joueursSurLeTerrain.has(parseInt(joueurActifId, 10));
+    document.getElementById('btn-entree').disabled = surLeTerrain;
+    document.getElementById('btn-sortie').disabled = !surLeTerrain;
+}
+
+document.getElementById('btn-entree').addEventListener('click', () => {
+    const id = parseInt(joueurActifId, 10);
+    actions.push({
+        id: Date.now() + Math.random(),
+        quart_temps: quartActif(),
+        joueur_id: id,
+        type: 'entree',
+        reussi: null,
+        type_possession: null,
+        valeur_temps: minuteMatch(),
     });
+    joueursSurLeTerrain.add(id);
+    renderJoueursColonnes();
+    updateSubstitutionButtons();
+    render();
+});
+
+document.getElementById('btn-sortie').addEventListener('click', () => {
+    const id = parseInt(joueurActifId, 10);
+    actions.push({
+        id: Date.now() + Math.random(),
+        quart_temps: quartActif(),
+        joueur_id: id,
+        type: 'sortie',
+        reussi: null,
+        type_possession: null,
+        valeur_temps: minuteMatch(),
+    });
+    joueursSurLeTerrain.delete(id);
+    renderJoueursColonnes();
+    updateSubstitutionButtons();
+    render();
 });
 
 document.querySelectorAll('.live-toggle').forEach(btn => {
@@ -156,7 +292,6 @@ function verifierCompletude() {
 }
 
 document.getElementById('valider-action').addEventListener('click', () => {
-    // Un lancer franc n'a pas de type de possession (ne fait pas partie d'une possession classée)
     const typePossession = selection.type === 'lf' ? null : possessionActive();
 
     actions.push({
@@ -166,6 +301,7 @@ document.getElementById('valider-action').addEventListener('click', () => {
         type: selection.type,
         reussi: selection.reussi === '1',
         type_possession: typePossession,
+        valeur_temps: null,
     });
 
     resetSelection();
@@ -189,6 +325,7 @@ function ajouterActionSimple(type) {
         type: type,
         reussi: true,
         type_possession: null,
+        valeur_temps: null,
     });
     render();
 }
@@ -201,19 +338,86 @@ function ajouterActionEquipe(type) {
         type: type,
         reussi: true,
         type_possession: null,
+        valeur_temps: null,
     });
     render();
+}
+
+document.getElementById('toggle-stats-panel').addEventListener('click', () => {
+    const panel = document.getElementById('stats-panel');
+    panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+    if (panel.style.display === 'block') updateStatsPanel();
+});
+
+function updateStatsPanel() {
+    const pointsParQuart = { 1: 0, 2: 0, 3: 0, 4: 0 };
+    const parJoueur = {};
+
+    actions.forEach(a => {
+        if (a.joueur_id !== null && !parJoueur[a.joueur_id]) {
+            parJoueur[a.joueur_id] = { points: 0, deux: 0, trois: 0, lf: 0, passes: 0, duels: 0 };
+        }
+
+        if ((a.type === '2pts' || a.type === '3pts' || a.type === 'lf') && a.reussi) {
+            const pts = a.type === '2pts' ? 2 : (a.type === '3pts' ? 3 : 1);
+            pointsParQuart[a.quart_temps] = (pointsParQuart[a.quart_temps] || 0) + pts;
+            if (a.joueur_id !== null) {
+                parJoueur[a.joueur_id].points += pts;
+                if (a.type === '2pts') parJoueur[a.joueur_id].deux++;
+                if (a.type === '3pts') parJoueur[a.joueur_id].trois++;
+                if (a.type === 'lf') parJoueur[a.joueur_id].lf++;
+            }
+        }
+        if (a.type === 'passe' && a.joueur_id !== null) parJoueur[a.joueur_id].passes++;
+        if (a.type === 'duel' && a.joueur_id !== null) parJoueur[a.joueur_id].duels++;
+    });
+
+    const total = pointsParQuart[1] + pointsParQuart[2] + pointsParQuart[3] + pointsParQuart[4];
+    document.getElementById('stats-points-quart').innerHTML =
+        `<td>${pointsParQuart[1]}</td><td>${pointsParQuart[2]}</td><td>${pointsParQuart[3]}</td><td>${pointsParQuart[4]}</td><td><strong>${total}</strong></td>`;
+
+    const tbody = document.getElementById('stats-joueurs');
+    tbody.innerHTML = '';
+    Object.keys(parJoueur).forEach(id => {
+        const s = parJoueur[id];
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td>${joueursNoms[id]}</td>
+            <td>${s.points}</td>
+            <td>${s.deux}</td>
+            <td>${s.trois}</td>
+            <td>${s.lf}</td>
+            <td>${s.passes}</td>
+            <td>${s.duels}</td>
+            <td>${joueursSurLeTerrain.has(parseInt(id, 10)) ? '🟢' : '-'}</td>
+        `;
+        tbody.appendChild(tr);
+    });
 }
 
 function render() {
     const tbody = document.getElementById('live-log');
     tbody.innerHTML = '';
 
-    actions.forEach(a => {
+    const actionsTriees = [...actions].sort((a, b) => a.quart_temps - b.quart_temps);
+    let dernierQuart = null;
+
+    actionsTriees.forEach(a => {
+        if (a.quart_temps !== dernierQuart) {
+            dernierQuart = a.quart_temps;
+            const trSep = document.createElement('tr');
+            trSep.className = 'live-quart-separator';
+            trSep.innerHTML = `<td colspan="6">Quart-temps ${a.quart_temps}</td>`;
+            tbody.appendChild(trSep);
+        }
+
         const tr = document.createElement('tr');
         const nomJoueur = a.joueur_id !== null ? joueursNoms[a.joueur_id] : '— Équipe —';
-        const sansResultat = ['passe', 'duel', 'rebond_def', 'rebond_off_adv', 'possession'].includes(a.type);
-        const resultat = sansResultat ? '-' : (a.reussi ? '✅' : '❌');
+        const sansResultat = ['passe', 'duel', 'rebond_def', 'rebond_off_adv', 'possession', 'entree', 'sortie'].includes(a.type);
+        let resultat = '-';
+        if (!sansResultat) resultat = a.reussi ? '✅' : '❌';
+        if (a.type === 'entree' || a.type === 'sortie') resultat = `min. ${a.valeur_temps}`;
+
         tr.innerHTML = `
             <td>Q${a.quart_temps}</td>
             <td>${nomJoueur}</td>
@@ -231,10 +435,20 @@ function render() {
     document.querySelectorAll('.delete-action').forEach(btn => {
         btn.addEventListener('click', () => {
             actions = actions.filter(a => a.id != btn.dataset.id);
+            recalculerJoueursSurLeTerrain();
             render();
         });
     });
+
+    localStorage.setItem(storageKey, JSON.stringify(actions));
+
+    if (document.getElementById('stats-panel').style.display !== 'none') {
+        updateStatsPanel();
+    }
 }
+
+recalculerJoueursSurLeTerrain();
+render();
 
 document.getElementById('save-all').addEventListener('click', async () => {
     const statusEl = document.getElementById('save-status');
@@ -249,6 +463,7 @@ document.getElementById('save-all').addEventListener('click', async () => {
         const data = await res.json();
 
         if (data.success) {
+            localStorage.removeItem(storageKey);
             window.location.href = '/match?id=' + matchId;
         } else {
             statusEl.textContent = 'Erreur : ' + (data.error || 'inconnue');
@@ -261,7 +476,7 @@ document.getElementById('save-all').addEventListener('click', async () => {
 
 <?php
 $title = "Saisie live";
-$content = ob_get_clean();
 $css = "live.css";
+$content = ob_get_clean();
 require __DIR__ . '/../layout.php';
 ?>

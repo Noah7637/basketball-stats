@@ -45,6 +45,9 @@ ob_start();
     Saisie live des stats
 </a>
 
+<a href="/match/journal?id=<?= (int) $match['id'] ?>">Voir le journal des actions</a>
+
+
 <table class="borderless-header-table">
 
         <thead>
