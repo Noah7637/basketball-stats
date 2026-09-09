@@ -240,4 +240,33 @@ public function liveSave(): void
     }
 }
 
+public function journal(): void
+    {
+        $matchId = (int) ($_GET['id'] ?? 0);
+        $match = MatchModel::find($matchId, Auth::id());
+
+        if (!$match) {
+            http_response_code(404);
+            echo "Match introuvable.";
+            return;
+        }
+
+        $journal = StatistiqueModel::journalPourMatch($matchId);
+
+        require __DIR__ . '/../Views/matches/journal.php';
+    }
+
+    public function deleteJournalAction(): void
+    {
+        $actionId = (int) ($_POST['action_id'] ?? 0);
+        $matchId = (int) ($_POST['match_id'] ?? 0);
+
+        StatistiqueModel::supprimerAction($actionId, Auth::id());
+
+        header('Location: /match/journal?id=' . $matchId);
+        exit;
+    }
+
+    
+
 }

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Core\Database;
+use PDO;
 
 class StatistiqueModel
 {
@@ -23,21 +24,165 @@ class StatistiqueModel
     }
 
     /**
-     * Reçoit le journal complet d'actions d'un match et les agrège en une seule
-     * écriture par joueur et par quart-temps.
-     *
-     * Types d'action possibles :
-     *  - '2pts' / '3pts' / 'lf'  : tir, lié à un joueur. Les tirs 2/3pts utilisent
-     *    type_possession UNIQUEMENT pour attribuer les points marqués (points_transition/
-     *    points_jeu_pose/points_contre_attaque) — ils n'incrémentent PAS nb_possessions,
-     *    car une possession peut contenir plusieurs tentatives (rebond offensif, etc.)
-     *  - 'possession'             : déclare explicitement le début d'une possession
-     *    (avec son type). C'est cette action, et elle seule, qui incrémente nb_possessions
-     *    et le compteur du type correspondant.
-     *  - 'passe' / 'duel'         : liés à un joueur uniquement (individuel)
-     *  - 'rebond_def' / 'rebond_off_adv' : stats d'équipe par quart-temps, pas de joueur
+     * Le journal complet et permanent d'un match, trié par quart-temps puis
+     * par ordre de saisie (id croissant).
+     */
+    public static function journalPourMatch(int $matchId): array
+    {
+        $pdo = Database::getInstance();
+        $stmt = $pdo->prepare(
+            "SELECT al.*, j.nom AS joueur_nom, j.numero AS joueur_numero
+             FROM actions_log al
+             LEFT JOIN joueurs j ON j.id = al.joueur_id
+             WHERE al.match_id = :match_id
+             ORDER BY al.quart_temps, al.id"
+        );
+        $stmt->execute(['match_id' => $matchId]);
+        return $stmt->fetchAll();
+    }
+
+    /**
+     * Enregistre un nouveau lot d'actions saisies en live : les ajoute au
+     * journal permanent, puis reconstruit entièrement les totaux du match
+     * (individuels et collectifs) à partir de la totalité du journal.
      */
     public static function sauvegarderLot(int $matchId, array $actions): void
+    {
+        if (empty($actions)) {
+            return;
+        }
+
+        $pdo = Database::getInstance();
+        $pdo->beginTransaction();
+
+        try {
+            $stmtLog = $pdo->prepare(
+                "INSERT INTO actions_log (match_id, joueur_id, quart_temps, type, reussi, type_possession)
+                 VALUES (:match_id, :joueur_id, :quart_temps, :type, :reussi, :type_possession)"
+            );
+
+            foreach ($actions as $a) {
+                $stmtLog->execute([
+                    'match_id' => $matchId,
+                    'joueur_id' => isset($a['joueur_id']) && $a['joueur_id'] !== null ? (int) $a['joueur_id'] : null,
+                    'quart_temps' => (int) $a['quart_temps'],
+                    'type' => $a['type'],
+                    'reussi' => isset($a['reussi']) ? ($a['reussi'] ? 1 : 0) : null,
+                    'type_possession' => $a['type_possession'] ?? null,
+                ]);
+            }
+
+            self::recalculerAgregats($pdo, $matchId);
+
+            $pdo->commit();
+        } catch (\Throwable $e) {
+            $pdo->rollBack();
+            throw $e;
+        }
+    }
+
+    /**
+     * Supprime une action précise du journal (vérifie qu'elle appartient bien
+     * à un match de l'utilisateur connecté), puis reconstruit les totaux du
+     * match à partir de ce qu'il reste dans le journal.
+     */
+    public static function supprimerAction(int $actionId, int $userId): bool
+    {
+        $pdo = Database::getInstance();
+
+        $stmt = $pdo->prepare(
+            "SELECT al.match_id FROM actions_log al
+             JOIN matches m ON m.id = al.match_id
+             WHERE al.id = :action_id AND m.user_id = :user_id"
+        );
+        $stmt->execute(['action_id' => $actionId, 'user_id' => $userId]);
+        $row = $stmt->fetch();
+
+        if (!$row) {
+            return false; // action inexistante ou n'appartenant pas à cet utilisateur
+        }
+
+        $matchId = (int) $row['match_id'];
+
+        $pdo->beginTransaction();
+
+        try {
+            $pdo->prepare("DELETE FROM actions_log WHERE id = :id")->execute(['id' => $actionId]);
+            self::recalculerAgregats($pdo, $matchId);
+            $pdo->commit();
+            return true;
+        } catch (\Throwable $e) {
+            $pdo->rollBack();
+            throw $e;
+        }
+    }
+
+    /**
+     * Reconstruit entièrement statistiques et statistiques_collectives pour
+     * un match, à partir de la totalité de son journal (actions_log). Appelée
+     * après chaque ajout ou suppression, pour que les totaux ne puissent
+     * jamais diverger du détail brut.
+     */
+    private static function recalculerAgregats(PDO $pdo, int $matchId): void
+    {
+        $stmt = $pdo->prepare("SELECT * FROM actions_log WHERE match_id = :match_id");
+        $stmt->execute(['match_id' => $matchId]);
+        $toutesActions = $stmt->fetchAll();
+
+        ['individuel' => $individuel, 'collectif' => $collectif] = self::agregerActions($toutesActions);
+
+        $pdo->prepare("DELETE FROM statistiques WHERE match_id = :id")->execute(['id' => $matchId]);
+        $pdo->prepare("DELETE FROM statistiques_collectives WHERE match_id = :id")->execute(['id' => $matchId]);
+
+        $stmtJoueur = $pdo->prepare(
+            "INSERT INTO statistiques
+                (match_id, joueur_id, tirs_2pts_tentes, tirs_2pts_reussis, tirs_3pts_tentes, tirs_3pts_reussis,
+                 lancers_francs_tentes, lancers_francs_reussis, passes_decisives, duels_defensifs_gagnes)
+             VALUES (:match_id, :joueur_id, :t2t, :t2r, :t3t, :t3r, :lft, :lfr, :pd, :ddg)"
+        );
+
+        foreach ($individuel as $joueurId => $s) {
+            if ($joueurId === null) {
+                continue;
+            }
+            $stmtJoueur->execute([
+                'match_id' => $matchId, 'joueur_id' => $joueurId,
+                't2t' => $s['tirs_2pts_tentes'], 't2r' => $s['tirs_2pts_reussis'],
+                't3t' => $s['tirs_3pts_tentes'], 't3r' => $s['tirs_3pts_reussis'],
+                'lft' => $s['lancers_francs_tentes'], 'lfr' => $s['lancers_francs_reussis'],
+                'pd' => $s['passes_decisives'], 'ddg' => $s['duels_defensifs_gagnes'],
+            ]);
+        }
+
+        $stmtCollectif = $pdo->prepare(
+            "INSERT INTO statistiques_collectives
+                (match_id, quart_temps, points, points_transition, points_jeu_pose, points_contre_attaque,
+                 nb_possessions, possessions_transition, possessions_jeu_pose,
+                 nb_contre_attaques, nb_contre_attaques_reussies,
+                 lancers_francs_tentes, lancers_francs_reussis,
+                 rebonds_defensifs, rebonds_offensifs_adversaires)
+             VALUES (:match_id, :quart, :points, :pt, :pjp, :pca, :nbp, :post, :posjp, :nca, :ncar, :lft, :lfr, :rd, :roa)"
+        );
+
+        foreach ($collectif as $quart => $s) {
+            $stmtCollectif->execute([
+                'match_id' => $matchId, 'quart' => $quart,
+                'points' => $s['points'], 'pt' => $s['points_transition'], 'pjp' => $s['points_jeu_pose'],
+                'pca' => $s['points_contre_attaque'],
+                'nbp' => $s['nb_possessions'], 'post' => $s['possessions_transition'], 'posjp' => $s['possessions_jeu_pose'],
+                'nca' => $s['nb_contre_attaques'], 'ncar' => $s['nb_contre_attaques_reussies'],
+                'lft' => $s['lancers_francs_tentes'], 'lfr' => $s['lancers_francs_reussis'],
+                'rd' => $s['rebonds_defensifs'], 'roa' => $s['rebonds_offensifs_adversaires'],
+            ]);
+        }
+    }
+
+    /**
+     * Pure fonction d'agrégation : prend une liste d'actions (venant du POST
+     * JS ou relue depuis actions_log, les deux ont les mêmes clés) et calcule
+     * les totaux individuels et collectifs. Ne touche pas à la base.
+     */
+    private static function agregerActions(array $actions): array
     {
         $champsIndividuels = [
             'tirs_2pts_tentes', 'tirs_2pts_reussis',
@@ -118,79 +263,6 @@ class StatistiqueModel
             }
         }
 
-        $pdo = Database::getInstance();
-        $pdo->beginTransaction();
-
-        try {
-            $stmtJoueur = $pdo->prepare(
-                "INSERT INTO statistiques
-                    (match_id, joueur_id, tirs_2pts_tentes, tirs_2pts_reussis, tirs_3pts_tentes, tirs_3pts_reussis,
-                     lancers_francs_tentes, lancers_francs_reussis, passes_decisives, duels_defensifs_gagnes)
-                 VALUES (:match_id, :joueur_id, :t2t, :t2r, :t3t, :t3r, :lft, :lfr, :pd, :ddg)
-                 ON DUPLICATE KEY UPDATE
-                    tirs_2pts_tentes = tirs_2pts_tentes + :t2t,
-                    tirs_2pts_reussis = tirs_2pts_reussis + :t2r,
-                    tirs_3pts_tentes = tirs_3pts_tentes + :t3t,
-                    tirs_3pts_reussis = tirs_3pts_reussis + :t3r,
-                    lancers_francs_tentes = lancers_francs_tentes + :lft,
-                    lancers_francs_reussis = lancers_francs_reussis + :lfr,
-                    passes_decisives = passes_decisives + :pd,
-                    duels_defensifs_gagnes = duels_defensifs_gagnes + :ddg"
-            );
-
-            foreach ($individuel as $joueurId => $s) {
-                if ($joueurId === null) {
-                    continue;
-                }
-                $stmtJoueur->execute([
-                    'match_id' => $matchId, 'joueur_id' => $joueurId,
-                    't2t' => $s['tirs_2pts_tentes'], 't2r' => $s['tirs_2pts_reussis'],
-                    't3t' => $s['tirs_3pts_tentes'], 't3r' => $s['tirs_3pts_reussis'],
-                    'lft' => $s['lancers_francs_tentes'], 'lfr' => $s['lancers_francs_reussis'],
-                    'pd' => $s['passes_decisives'], 'ddg' => $s['duels_defensifs_gagnes'],
-                ]);
-            }
-
-            $stmtCollectif = $pdo->prepare(
-                "INSERT INTO statistiques_collectives
-                    (match_id, quart_temps, points, points_transition, points_jeu_pose, points_contre_attaque,
-                     nb_possessions, possessions_transition, possessions_jeu_pose,
-                     nb_contre_attaques, nb_contre_attaques_reussies,
-                     lancers_francs_tentes, lancers_francs_reussis,
-                     rebonds_defensifs, rebonds_offensifs_adversaires)
-                 VALUES (:match_id, :quart, :points, :pt, :pjp, :pca, :nbp, :post, :posjp, :nca, :ncar, :lft, :lfr, :rd, :roa)
-                 ON DUPLICATE KEY UPDATE
-                    points = points + :points,
-                    points_transition = points_transition + :pt,
-                    points_jeu_pose = points_jeu_pose + :pjp,
-                    points_contre_attaque = points_contre_attaque + :pca,
-                    nb_possessions = nb_possessions + :nbp,
-                    possessions_transition = possessions_transition + :post,
-                    possessions_jeu_pose = possessions_jeu_pose + :posjp,
-                    nb_contre_attaques = nb_contre_attaques + :nca,
-                    nb_contre_attaques_reussies = nb_contre_attaques_reussies + :ncar,
-                    lancers_francs_tentes = lancers_francs_tentes + :lft,
-                    lancers_francs_reussis = lancers_francs_reussis + :lfr,
-                    rebonds_defensifs = rebonds_defensifs + :rd,
-                    rebonds_offensifs_adversaires = rebonds_offensifs_adversaires + :roa"
-            );
-
-            foreach ($collectif as $quart => $s) {
-                $stmtCollectif->execute([
-                    'match_id' => $matchId, 'quart' => $quart,
-                    'points' => $s['points'], 'pt' => $s['points_transition'], 'pjp' => $s['points_jeu_pose'],
-                    'pca' => $s['points_contre_attaque'],
-                    'nbp' => $s['nb_possessions'], 'post' => $s['possessions_transition'], 'posjp' => $s['possessions_jeu_pose'],
-                    'nca' => $s['nb_contre_attaques'], 'ncar' => $s['nb_contre_attaques_reussies'],
-                    'lft' => $s['lancers_francs_tentes'], 'lfr' => $s['lancers_francs_reussis'],
-                    'rd' => $s['rebonds_defensifs'], 'roa' => $s['rebonds_offensifs_adversaires'],
-                ]);
-            }
-
-            $pdo->commit();
-        } catch (\Throwable $e) {
-            $pdo->rollBack();
-            throw $e;
-        }
+        return ['individuel' => $individuel, 'collectif' => $collectif];
     }
 }

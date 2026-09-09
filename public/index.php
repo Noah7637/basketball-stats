@@ -46,5 +46,7 @@ $router->get('/match/selection', [MatchController::class, 'selectionJoueurs']);
 $router->post('/match/selection', [MatchController::class, 'saveSelection']);
 $router->get('/match/live', [MatchController::class, 'live']);
 $router->post('/match/live/save', [MatchController::class, 'liveSave']);
+$router->get('/match/journal', [MatchController::class, 'journal']);
+$router->post('/match/journal/delete-action', [MatchController::class, 'deleteJournalAction']);
 
 $router->dispatch($_SERVER['REQUEST_METHOD'], $_SERVER['REQUEST_URI']);
