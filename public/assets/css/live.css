@@ -43,6 +43,8 @@
 
 .live-court-column h2 {
     margin-top: 0;
+    display: flex;
+    align-items: center;
 }
 
 .live-empty-note {
@@ -197,6 +199,8 @@
 /* --------------- Boutons entrée/sortie --------------- */
 
 .live-substitution-btn {
+    display: flex;
+    align-items: center;
     padding: 0.5rem 0.9rem;
     border-radius: 6px;
     cursor: pointer;
@@ -231,6 +235,10 @@
     background: white;
     color: #333;
     border: 1px solid #ccc;
+    border-radius: 6px;
+    padding: 0.5rem 0.9rem;
+    display: flex;
+    align-items: center;
 }
 
 #toggle-stats-panel:hover {
@@ -254,6 +262,12 @@
 .stats-panel h3 {
     font-size: 0.95rem;
     margin: 1rem 0 0.5rem;
+}
+
+.live-circle {
+    width: 25px;
+    height: 25px;
+    margin-right: 0.25rem;
 }
 
 /* --------------- Responsive --------------- */

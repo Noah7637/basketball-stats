@@ -27,7 +27,8 @@ class JoueurModel
         0
     ) AS pourcentage_reussite_tirs,
     COALESCE(AVG(s.duels_defensifs_gagnes), 0) AS duel_def,
-    COUNT(DISTINCT s.match_id) AS matchs_joues
+    COUNT(DISTINCT s.match_id) AS matchs_joues,
+    COALESCE(AVG(s.minutes_jouees), 0) AS minutes_jouees
 FROM joueurs j
 LEFT JOIN statistiques s ON s.joueur_id = j.id
 WHERE j.user_id = :userId
@@ -55,7 +56,8 @@ ORDER BY moyenne_points DESC"
         0
     ) AS pourcentage_reussite_tirs,
     COALESCE(AVG(s.duels_defensifs_gagnes), 0) AS duel_def,
-    COUNT(DISTINCT s.match_id) AS matchs_joues
+    COUNT(DISTINCT s.match_id) AS matchs_joues,
+    COALESCE(AVG(s.minutes_jouees), 0) AS minutes_jouees
 FROM joueurs j
 LEFT JOIN statistiques s ON s.joueur_id = j.id
 WHERE j.id = :id

@@ -4,7 +4,7 @@ ob_start();
 
 ?>
 
-<h1>Matchs zebi</h1>
+<h1>Matchs</h1>
 
 <p>
     <a href="/match/create">+ Créer un match</a>

@@ -23,7 +23,7 @@
     </div>
 
     <button type="button" id="nouvelle-possession">+ Nouvelle possession</button>
-    <button type="button" id="toggle-stats-panel">📊 Stats du match</button>
+    <button type="button" id="toggle-stats-panel"><img src="/assets/img/statistics.png" alt="Stats" class="live-circle"> Stats du match</button>
 </div>
 
 <div id="stats-panel" class="stats-panel" style="display:none;">
@@ -51,14 +51,14 @@
 
 <div class="live-court-split">
     <div class="live-court-column">
-        <h2>🟢 Sur le terrain</h2>
+        <h2><img src="/assets/img/green-circle.png" alt="" class="live-circle"> Sur le terrain</h2>
         <div class="live-players" id="joueurs-terrain">
             <p class="live-empty-note">Aucun joueur sur le terrain.</p>
         </div>
     </div>
 
     <div class="live-court-column">
-        <h2>⚪ Sur le banc</h2>
+        <h2><img src="/assets/img/empty-circle.png" alt="" class="live-circle"> Sur le banc</h2>
         <div class="live-players" id="joueurs-banc"></div>
     </div>
 </div>
@@ -71,29 +71,35 @@
             <label for="minute-match">Minute du match (pour l'entrée/sortie)</label>
             <input type="number" id="minute-match" min="0" max="60" value="0" style="width:100px">
         </div>
-        <button type="button" id="btn-entree" class="live-substitution-btn">🟢 Entrée sur le terrain</button>
-        <button type="button" id="btn-sortie" class="live-substitution-btn">⚪ Sortie du terrain</button>
+        <button type="button" id="btn-entree" class="live-substitution-btn"><img src="/assets/img/green-circle.png" alt="" class="live-circle"> Entrée sur le terrain</button>
+        <button type="button" id="btn-sortie" class="live-substitution-btn"><img src="/assets/img/empty-circle.png" alt="" class="live-circle"> Sortie du terrain</button>
     </div>
 
-    <div class="live-action-group">
-        <span class="live-action-label">Type de tir</span>
-        <button type="button" class="live-toggle" data-group="type" data-value="2pts">2 pts</button>
-        <button type="button" class="live-toggle" data-group="type" data-value="3pts">3 pts</button>
-        <button type="button" class="live-toggle" data-group="type" data-value="lf">Lancer franc</button>
-    </div>
+    <p id="live-actions-warning" class="live-actions-warning" style="display:none;">
+        ⚠️ Ce joueur est sur le banc — fais-le entrer sur le terrain avant d'ajouter une action.
+    </p>
 
-    <div class="live-action-group">
-        <span class="live-action-label">Résultat</span>
-        <button type="button" class="live-toggle" data-group="reussi" data-value="1">Réussi</button>
-        <button type="button" class="live-toggle" data-group="reussi" data-value="0">Manqué</button>
-    </div>
+    <div id="zone-actions-joueur">
+        <div class="live-action-group">
+            <span class="live-action-label">Type de tir</span>
+            <button type="button" class="live-toggle" data-group="type" data-value="2pts">2 pts</button>
+            <button type="button" class="live-toggle" data-group="type" data-value="3pts">3 pts</button>
+            <button type="button" class="live-toggle" data-group="type" data-value="lf">Lancer franc</button>
+        </div>
 
-    <button type="button" id="valider-action" disabled>Valider l'action</button>
+        <div class="live-action-group">
+            <span class="live-action-label">Résultat</span>
+            <button type="button" class="live-toggle" data-group="reussi" data-value="1">Réussi</button>
+            <button type="button" class="live-toggle" data-group="reussi" data-value="0">Manqué</button>
+        </div>
 
-    <div class="live-quick-actions">
-        <span class="live-action-label">Actions rapides</span>
-        <button type="button" id="quick-passe">+1 Passe décisive</button>
-        <button type="button" id="quick-duel">+1 Duel défensif gagné</button>
+        <button type="button" id="valider-action" disabled>Valider l'action</button>
+
+        <div class="live-quick-actions">
+            <span class="live-action-label">Actions rapides</span>
+            <button type="button" id="quick-passe">+1 Passe décisive</button>
+            <button type="button" id="quick-duel">+1 Duel défensif gagné</button>
+        </div>
     </div>
 </div>
 
@@ -214,8 +220,29 @@ function attacherEcouteursJoueurs() {
             document.getElementById('live-panel').style.display = 'block';
             resetSelection();
             updateSubstitutionButtons();
+            updateActionsAvailability();
         });
     });
+}
+
+// Bloque les tirs/passes/duels tant que le joueur sélectionné n'est pas sur le terrain
+function updateActionsAvailability() {
+    const surLeTerrain = joueursSurLeTerrain.has(parseInt(joueurActifId, 10));
+    const zoneActions = document.getElementById('zone-actions-joueur');
+
+    zoneActions.classList.toggle('live-actions-disabled', !surLeTerrain);
+
+    document.querySelectorAll('#zone-actions-joueur .live-toggle, #quick-passe, #quick-duel').forEach(btn => {
+        btn.disabled = !surLeTerrain;
+    });
+
+    document.getElementById('live-actions-warning').style.display = surLeTerrain ? 'none' : 'block';
+
+    if (!surLeTerrain) {
+        document.getElementById('valider-action').disabled = true;
+    } else {
+        verifierCompletude();
+    }
 }
 
 document.getElementById('nouvelle-possession').addEventListener('click', () => {
@@ -251,6 +278,7 @@ document.getElementById('btn-entree').addEventListener('click', () => {
     joueursSurLeTerrain.add(id);
     renderJoueursColonnes();
     updateSubstitutionButtons();
+    updateActionsAvailability();
     render();
 });
 
@@ -268,6 +296,7 @@ document.getElementById('btn-sortie').addEventListener('click', () => {
     joueursSurLeTerrain.delete(id);
     renderJoueursColonnes();
     updateSubstitutionButtons();
+    updateActionsAvailability();
     render();
 });
 
@@ -292,6 +321,11 @@ function verifierCompletude() {
 }
 
 document.getElementById('valider-action').addEventListener('click', () => {
+    if (!joueursSurLeTerrain.has(parseInt(joueurActifId, 10))) {
+        alert('Ce joueur est sur le banc, fais-le entrer sur le terrain d\'abord.');
+        return;
+    }
+
     const typePossession = selection.type === 'lf' ? null : possessionActive();
 
     actions.push({
@@ -316,6 +350,10 @@ document.getElementById('quick-reb-off-adv').addEventListener('click', () => ajo
 function ajouterActionSimple(type) {
     if (!joueurActifId) {
         alert('Sélectionne d\'abord un joueur.');
+        return;
+    }
+    if (!joueursSurLeTerrain.has(parseInt(joueurActifId, 10))) {
+        alert('Ce joueur est sur le banc, fais-le entrer sur le terrain d\'abord.');
         return;
     }
     actions.push({
@@ -389,7 +427,7 @@ function updateStatsPanel() {
             <td>${s.lf}</td>
             <td>${s.passes}</td>
             <td>${s.duels}</td>
-            <td>${joueursSurLeTerrain.has(parseInt(id, 10)) ? '🟢' : '-'}</td>
+            <td>${joueursSurLeTerrain.has(parseInt(id, 10)) ? '<img src="/assets/img/green-circle.png" alt="" class="live-circle">' : '-'}</td>
         `;
         tbody.appendChild(tr);
     });

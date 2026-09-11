@@ -56,6 +56,7 @@ ob_start();
                 <th>Pts / tentative</th>
                 <th>% tirs</th>
                 <th>Duels déf.</th>
+                th>Minutes / match</th>
             </tr>
         </thead>
         <tbody>
@@ -66,6 +67,7 @@ ob_start();
                 <td><?= number_format($moyenne['points_par_tentative'], 2) ?></td>
                 <td><?= number_format($moyenne['pourcentage_reussite_tirs'], 1) ?>%</td>
                 <td><?= number_format($moyenne['duel_def'], 1) ?></td>
+                <td><?= number_format($moyenne['minutes_jouees'], 1) ?></td>
             </tr>
         </tbody>
     </table>

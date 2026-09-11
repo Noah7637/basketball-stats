@@ -38,6 +38,7 @@ ob_start();
                 <th>Pts / tentative</th>
                 <th>% tirs</th>
                 <th>Duels déf.</th>
+                <th>Minutes / match</th>
                 <th>Supprimer</th>
                 <th>Modifier</th>
             </tr>
@@ -90,6 +91,10 @@ ob_start();
 
                 <td>
                     <?= number_format($joueur['duel_def'], 1) ?>
+                </td>
+
+                <td>
+                    <?= number_format($joueur['minutes_jouees'], 1) ?>
                 </td>
 
                 <td>

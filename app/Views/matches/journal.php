@@ -1,6 +1,6 @@
 <?php ob_start(); ?>
 
-<h1>Journal du match — vs <?= htmlspecialchars($match['adversaire']) ?></h1>
+<h1>Journal du match - vs <?= htmlspecialchars($match['adversaire']) ?></h1>
 
 <p><a href="/match?id=<?= (int) $match['id'] ?>">← Retour au match</a></p>
 
