@@ -56,7 +56,7 @@ ob_start();
                 <th>Pts / tentative</th>
                 <th>% tirs</th>
                 <th>Duels déf.</th>
-                th>Minutes / match</th>
+                <th>Minutes / match</th>
             </tr>
         </thead>
         <tbody>

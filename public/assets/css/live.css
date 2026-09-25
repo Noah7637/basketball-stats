@@ -264,6 +264,30 @@
     margin: 1rem 0 0.5rem;
 }
 
+.stats-panel table tr {
+    gap: 20px;
+}
+
+.stats-panel .borderless-header-table th,
+.stats-panel .borderless-header-table td {
+    padding: 0.75rem 1rem;
+    text-align: center;
+    font-size: 0.9rem;
+}
+
+.stats-panel .borderless-header-table th:first-child,
+.stats-panel .borderless-header-table td:first-child {
+    text-align: left;
+}
+
+.stats-panel .borderless-header-table tbody tr {
+    border-bottom: 1px solid #eee;
+}
+
+.stats-panel .borderless-header-table tbody tr:nth-child(even) {
+    background: #fafcfa;
+}
+
 .live-circle {
     width: 25px;
     height: 25px;
